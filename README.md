@@ -1,80 +1,159 @@
-Animal Allies
+# 🐾 Animal Allies
 
-## Donations and payments
+> **Explore. Understand. Protect.**
 
-## Rescue alerts and AI guide
+**Animal Allies** is an interactive wildlife and conservation platform designed to make learning about animals feel less like reading a database and more like **exploring a living digital world**.
 
-The rescue-report form now calls the local server at `/api/rescue-reports`. It sends:
+The project combines immersive visuals, interactive UI, smooth animations, animal discovery, and conservation-focused storytelling to create an experience that is both educational and visually engaging.
 
-- an urgent email to `RESCUE_ALERT_TO`;
-- an acknowledgement email to the reporter; and
-- an optional SMS to `RESCUE_ALERT_SMS_TO` through Twilio.
+---
 
-Copy `.env.example` to `.env`, then supply working SMTP details and/or Twilio
-credentials. Without a configured mail or SMS provider, the site shows an honest
-error and points the reporter to call or WhatsApp instead of claiming an alert was sent.
+## 🌍 What is Animal Allies?
 
-The floating **Ask Ally** guide calls `/api/ask-ally` using the server-only
-`OPENAI_API_KEY`. Its default model is `gpt-5.6-luna`, with no reasoning,
-240 output-token maximum, 150-word responses, no tools, no server-side response
-storage, and a configurable hourly cap of 20 questions per connection.
+Wildlife information is often presented through static lists, articles, and traditional databases.
 
-The redesigned [donation page](donate.html) works immediately with the configured UPI ID
-`7398259999@okbizaxis`: it generates a fresh QR code for the selected amount and opens
-the donor's UPI app on supported phones.
+**Animal Allies takes a different approach.**
 
-For a complete secure gateway (UPI, cards, wallets and netbanking), it also includes a
-Razorpay order and signature-verification backend. To enable it:
+The platform turns animal discovery into an interactive experience where users can explore species, learn about their habitats and characteristics, discover conservation challenges, and understand why protecting wildlife matters.
 
-1. Run `npm install`.
-2. Copy `.env.example` to `.env` and add the Razorpay Key ID and Key Secret issued
-   for your account.
-3. Put the same **Key ID** (never the secret) in `payment-config.js`.
-4. Start the site with `npm start` and open `http://localhost:3000/donate.html`.
+The goal is simple:
 
-Keep `.env` private. Do not publish the Razorpay secret in HTML, JavaScript, or Git.
+> **Make people curious about animals first — and care about protecting them next.**
 
-Project Overview
+---
 
-Animal Allies is a web platform dedicated to promoting animal welfare and rescue efforts. The website allows users to report injured animals, donate to support animal care, and access resources on how to get involved in helping animals. The goal is to create a compassionate community where users can take meaningful action to protect and assist animals in need.
+## ✨ Features
 
-Features
+### 🐯 Explore Animals
 
-Report Injured Animals: Users can submit reports of injured animals, helping local organizations respond quickly.
+Discover different species through visually rich and interactive animal experiences.
 
-Donation System: A secure donation feature where users can enter an amount and generate a QR code for easy payment processing.
+Each animal can provide information such as:
 
-User-Friendly Interface: A responsive, modern design that works well on both desktop and mobile devices.
+- Common name
+- Scientific name
+- Habitat
+- Diet
+- Conservation status
+- Geographic distribution
+- Behaviour
+- Interesting facts
+- Major threats
 
+---
 
-Technologies Used
+### 🔎 Smart Discovery
 
-Frontend: HTML, CSS, JavaScript
+Find animals quickly through an intuitive exploration experience.
 
-Other Tools: Any additional tools or libraries used (e.g., Bootstrap, jQuery)
+Users can:
 
+- Search for animals
+- Browse categories
+- Filter species
+- Explore different habitats
+- Discover endangered species
+- Navigate through animal collections
 
-How to Run
+---
 
-1. Clone the repository: git clone [[https://github.com/Alok2709-dev/animal-allies-project-2.git
-](https://github.com/Alok2709-dev/Animal-allies-2/tree/main/animal-allies-project-
-](https://github.com/Alok2709-dev/Animal-allies-2/tree/main/animal-allies-project-2)
-3. Open index.html in a browser to view the homepage.
+### 🌿 Habitat Exploration
 
+Explore wildlife through the environments they call home.
 
-4. (Optional) Set up the backend if applicable.
+From forests and grasslands to oceans and other ecosystems, Animal Allies connects animals with the environments that support them.
 
+---
 
+### 🎨 Interactive UI
 
-Future Enhancements
+Animal Allies is designed around the idea that **interaction should feel rewarding**.
 
-Implement user login for tracking reports.
+The interface uses:
 
-Add an interactive map to show reported cases in real-time.
+- Smooth transitions
+- Hover interactions
+- Animated cards
+- Scroll-based effects
+- Micro-interactions
+- Image transitions
+- Dynamic visual elements
+- Responsive layouts
 
-Expand donation options (e.g., PayPal, credit card).
+The objective is not to animate everything.
 
+Instead, motion is used to make the interface feel **alive and intuitive**.
 
-Contributing
+---
 
-Feel free to fork this project and submit pull requests with any improvements or bug fixes. Suggestions are always welcome!
+### 📊 Conservation Information
+
+Wildlife isn't just about discovering beautiful animals.
+
+Animal Allies also highlights:
+
+- Endangered species
+- Threats to wildlife
+- Habitat loss
+- Conservation challenges
+- The importance of protecting ecosystems
+
+The experience connects information with the bigger picture of conservation.
+
+---
+
+### 💚 Take Action
+
+The platform encourages users to move beyond simply learning.
+
+The experience is designed to inspire actions such as:
+
+- Learning more
+- Supporting conservation
+- Sharing awareness
+- Volunteering
+- Helping wildlife organizations
+- Becoming more conscious of environmental impact
+
+---
+
+## 🎯 Design Philosophy
+
+Animal Allies was built around three principles:
+
+### 01 — Discover
+
+Make users want to explore.
+
+### 02 — Understand
+
+Present information in a way that is simple, visual, and memorable.
+
+### 03 — Care
+
+Turn knowledge into awareness and, eventually, action.
+
+---
+
+## 🧠 UX Philosophy
+
+The project intentionally avoids feeling like a traditional information-heavy website.
+
+Instead of:
+
+`Search → Read → Leave`
+
+Animal Allies aims for:
+
+`Discover → Explore → Interact → Learn → Care`
+
+Every part of the interface is designed to encourage curiosity.
+
+---
+
+## 🖥️ Experience
+
+The visual direction combines:
+
+- 🌲 Natural environments
+- 🐾 Wildlife
