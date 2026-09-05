@@ -1,0 +1,7 @@
+{
+  "name": "animal-allies",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "dotenv": "^16.4.5", "express": "^4.17.1", "nodemailer": "^6.9.15", "openai": "^6.26.0", "razorpay": "^2.2.0" }
+}
