@@ -12,7 +12,40 @@
   $$('.reveal').forEach(element => observer.observe(element));
   const statObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (!entry.isIntersecting) return; const target = entry.target; const end = Number(target.dataset.count); const start = performance.now(); const duration = 1300; const frame = time => { const t = Math.min((time - start) / duration, 1), current = Math.floor(end * (1 - Math.pow(1 - t, 3))); target.textContent = current.toLocaleString('en-IN') + (target.dataset.suffix || ''); if (t < 1) requestAnimationFrame(frame); }; requestAnimationFrame(frame); statObserver.unobserve(target); }), { threshold: .45 });
   $$('[data-count]').forEach(element => statObserver.observe(element));
-  const cards = $$('.animal-card');
+  const cards = $('.animal-card');
+  const animalDetails = {
+    tiger: ['Bengal tiger', 'Panthera tigris', 'Forests and grasslands of the Indian subcontinent', 'Tigers are apex predators that help keep ecosystems balanced. Major threats include habitat loss, poaching and conflict near settlements. Protecting connected forests and reporting wildlife crime helps them survive.'],
+    turtle: ['Green turtle', 'Chelonia mydas', 'Tropical and subtropical oceans', 'Green turtles spend most of their lives at sea and depend on healthy marine habitats. Plastic, fishing gear and nesting-beach disturbance are serious threats. Never touch a nesting turtle or disturb hatchlings.'],
+    elephant: ['Asian elephant', 'Elephas maximus', 'South and Southeast Asian forests and grasslands', 'Elephants are highly social, intelligent mammals that shape their habitats. Habitat fragmentation and conflict with people are major challenges. Observe wild elephants from a safe distance and never approach a herd.'],
+    leopard: ['Leopard', 'Panthera pardus', 'Woodlands, forests and varied landscapes across Africa and Asia', 'Leopards are adaptable, mostly solitary big cats. Habitat loss and conflict can put them at risk. If one is spotted nearby, do not crowd it or attempt to chase it; follow local wildlife guidance.']
+  };
+  let animalDialog = null;
+  const closeAnimalDialog = () => { if (animalDialog) { animalDialog.remove(); animalDialog = null; } };
+  cards.forEach(card => {
+    const learn = $('.learn-animal', card);
+    if (!learn) return;
+    learn.addEventListener('click', event => {
+      event.stopPropagation();
+      closeAnimalDialog();
+      const id = card.dataset.animal;
+      const fallback = animalDetails[id] || [card.querySelector('h3')?.textContent || 'Animal', card.dataset.scientific || 'Species details', card.dataset.range || 'Learn about its habitat', card.dataset.facts || 'Every animal needs a safe habitat, clean water and compassionate, informed care. If you find an injured animal, keep a safe distance and contact a qualified local rescuer or veterinarian.'];
+      const title = card.querySelector('h3')?.textContent || fallback[0];
+      const scientific = card.dataset.scientific || fallback[1];
+      const range = card.dataset.range || fallback[2];
+      const facts = card.dataset.facts || fallback[3];
+      animalDialog = document.createElement('div');
+      animalDialog.className = 'animal-dialog-backdrop';
+      animalDialog.innerHTML = '<section class="animal-dialog" role="dialog" aria-modal="true" aria-labelledby="animalDialogTitle"><button class="animal-dialog-close" type="button" aria-label="Close animal details">×</button><p class="eyebrow">Field notes · Animal guide</p><h2 id="animalDialogTitle"></h2><p class="animal-scientific"></p><div class="animal-detail-rule"></div><h3>Where it lives</h3><p class="animal-range"></p><h3>Know and protect</h3><p class="animal-facts"></p><a class="btn animal-rescue-link" href="report-injured-animal.html">Report an animal in need ↗</a></section>';
+      $('.animal-dialog h2', animalDialog).textContent = title;
+      $('.animal-scientific', animalDialog).textContent = scientific;
+      $('.animal-range', animalDialog).textContent = range;
+      $('.animal-facts', animalDialog).textContent = facts;
+      document.body.append(animalDialog);
+      $('.animal-dialog-close', animalDialog).focus();
+      animalDialog.addEventListener('click', e => { if (e.target === animalDialog || e.target.closest('.animal-dialog-close')) closeAnimalDialog(); });
+      document.addEventListener('keydown', function escapeDialog(e) { if (e.key === 'Escape' && animalDialog) { closeAnimalDialog(); document.removeEventListener('keydown', escapeDialog); } });
+    });
+  });
   const search = $('#animalSearch');
   const filterButtons = $$('.filter');
   const applyFilter = () => { const term = (search?.value || '').toLowerCase(); const active = $('.filter.active')?.dataset.filter || 'all'; let count = 0; cards.forEach(card => { const match = (active === 'all' || card.dataset.habitat.includes(active) || card.dataset.status.includes(active)) && card.textContent.toLowerCase().includes(term); card.hidden = !match; if (match) count++; }); const empty = $('.empty'); if (empty) empty.style.display = count ? 'none' : 'block'; };
