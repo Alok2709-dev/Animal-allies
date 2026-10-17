@@ -48,7 +48,7 @@
   });
   const search = $('#animalSearch');
   const filterButtons = $$('.filter');
-  const applyFilter = () => { const term = (search?.value || '').toLowerCase(); const active = $('.filter.active')?.dataset.filter || 'all'; let count = 0; cards.forEach(card => { const match = (active === 'all' || card.dataset.habitat.includes(active) || card.dataset.status.includes(active)) && card.textContent.toLowerCase().includes(term); card.hidden = !match; if (match) count++; }); const empty = $('.empty'); if (empty) empty.style.display = count ? 'none' : 'block'; };
+  const applyFilter = () => { const term = (search?.value || '').toLowerCase(); const active = $('.filter.active')?.dataset.filter || 'all'; let count = 0; cards.forEach(card => { const animal = (card.dataset.animal || '').toLowerCase(); const categoryMatch = active === 'all' || (active === 'dog' && animal.includes('dog')) || (active === 'cat' && animal.includes('cat')) || (active === 'bird' && (animal.includes('owl') || animal.includes('bird'))) || (active === 'farm' && (animal.includes('cow') || animal.includes('dog') || animal.includes('cat'))); const match = categoryMatch && card.textContent.toLowerCase().includes(term); card.hidden = !match; if (match) count++; }); const empty = $('.empty'); if (empty) empty.style.display = count ? 'none' : 'block'; };
   search?.addEventListener('input', applyFilter);
   // Search the live web via Wikipedia's public API; local rescue cards remain available without network access.
   const onlineResults = $('#onlineAnimalResults');
@@ -81,7 +81,14 @@
   filterButtons.forEach(button => button.addEventListener('click', () => { filterButtons.forEach(item => item.classList.toggle('active', item === button)); applyFilter(); }));
   const saved = JSON.parse(localStorage.getItem('aa-favourites') || '[]');
   $$('.save').forEach(button => { const id = button.closest('.animal-card').dataset.animal; button.classList.toggle('saved', saved.includes(id)); button.setAttribute('aria-pressed', saved.includes(id)); button.addEventListener('click', event => { event.stopPropagation(); const at = saved.indexOf(id); at === -1 ? saved.push(id) : saved.splice(at, 1); localStorage.setItem('aa-favourites', JSON.stringify(saved)); button.classList.toggle('saved'); button.setAttribute('aria-pressed', String(at === -1)); }); });
-  cards.forEach(card => card.addEventListener('mousemove', event => { if (matchMedia('(pointer:fine)').matches) { const box = card.getBoundingClientRect(), x = (event.clientX - box.left) / box.width - .5, y = (event.clientY - box.top) / box.height - .5; card.style.transform = `translateY(-6px) rotate(${x * .8}deg) perspective(600px) rotateX(${-y * 2}deg)`; } }));
+  cards.forEach(card => {
+    card.tabIndex = 0; card.setAttribute('role', 'link');
+    card.setAttribute('aria-label', 'Open details for ' + (card.querySelector('h3')?.textContent || 'animal'));
+    const openAnimal = () => { const slug = card.dataset.animal || card.querySelector('h3')?.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-'); window.location.href = 'animal.html?animal=' + encodeURIComponent(slug); };
+    card.addEventListener('click', event => { if (event.target.closest('.save')) return; openAnimal(); });
+    card.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && event.target === card) { event.preventDefault(); openAnimal(); } });
+  });
+    cards.forEach(card => card.addEventListener('mousemove', event => { if (matchMedia('(pointer:fine)').matches) { const box = card.getBoundingClientRect(), x = (event.clientX - box.left) / box.width - .5, y = (event.clientY - box.top) / box.height - .5; card.style.transform = `translateY(-6px) rotate(${x * .8}deg) perspective(600px) rotateX(${-y * 2}deg)`; } }));
   cards.forEach(card => card.addEventListener('mouseleave', () => card.style.transform = ''));
   const contactForms = $$('form[data-demo-form]');
   contactForms.forEach(form => form.addEventListener('submit', event => { event.preventDefault(); const note = $('.form-note', form); if (note) { note.textContent = 'Thanks — your message has been prepared. Connect this form to your email service to send it live.'; note.style.color = '#1f7048'; } }));
