@@ -50,6 +50,34 @@
   const filterButtons = $$('.filter');
   const applyFilter = () => { const term = (search?.value || '').toLowerCase(); const active = $('.filter.active')?.dataset.filter || 'all'; let count = 0; cards.forEach(card => { const match = (active === 'all' || card.dataset.habitat.includes(active) || card.dataset.status.includes(active)) && card.textContent.toLowerCase().includes(term); card.hidden = !match; if (match) count++; }); const empty = $('.empty'); if (empty) empty.style.display = count ? 'none' : 'block'; };
   search?.addEventListener('input', applyFilter);
+  // Search the live web via Wikipedia's public API; local rescue cards remain available without network access.
+  const onlineResults = $('#onlineAnimalResults');
+  const onlineStatus = $('#onlineAnimalStatus');
+  let onlineSearchController = null;
+  let onlineSearchTimer = null;
+  const escapeHTML = value => String(value || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const searchAnimalsOnline = async term => {
+    if (!onlineResults || !onlineStatus) return;
+    if (onlineSearchController) onlineSearchController.abort();
+    onlineResults.replaceChildren();
+    if (term.length < 2) { onlineStatus.textContent = 'Search an animal name to discover images and facts from Wikipedia.'; return; }
+    onlineSearchController = new AbortController();
+    onlineStatus.textContent = 'Searching the web for animals…';
+    try {
+      const endpoint = 'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrnamespace=0&gsrlimit=8&gsrsearch=' + encodeURIComponent(term + ' animal') + '&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=700&exintro=1&explaintext=1&format=json&origin=*';
+      const response = await fetch(endpoint, {signal: onlineSearchController.signal});
+      if (!response.ok) throw new Error('Search unavailable');
+      const data = await response.json();
+      const pages = Object.values(data.query?.pages || {}).filter(page => page.thumbnail?.source && page.extract);
+      if (!pages.length) { onlineStatus.textContent = 'No illustrated web results found. Try a broader animal name.'; return; }
+      onlineResults.innerHTML = pages.map(page => '<article class="online-animal-card"><img loading="lazy" src="' + escapeHTML(page.thumbnail.source) + '" alt="' + escapeHTML(page.title) + '"><div class="online-animal-copy"><h3>' + escapeHTML(page.title) + '</h3><p>' + escapeHTML(page.extract.slice(0, 210)) + (page.extract.length > 210 ? '…' : '') + '</p><a href="https://en.wikipedia.org/?curid=' + encodeURIComponent(page.pageid) + '" target="_blank" rel="noopener noreferrer">Read source ↗</a></div></article>').join('');
+      onlineStatus.textContent = 'Web results from Wikipedia. Open a source to read more; these are educational results, not verified rescue listings.';
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      onlineStatus.textContent = 'Could not reach the animal search right now. Check your internet connection and try again.';
+    }
+  };
+  search?.addEventListener('input', () => { clearTimeout(onlineSearchTimer); onlineSearchTimer = setTimeout(() => searchAnimalsOnline(search.value.trim()), 350); });
   filterButtons.forEach(button => button.addEventListener('click', () => { filterButtons.forEach(item => item.classList.toggle('active', item === button)); applyFilter(); }));
   const saved = JSON.parse(localStorage.getItem('aa-favourites') || '[]');
   $$('.save').forEach(button => { const id = button.closest('.animal-card').dataset.animal; button.classList.toggle('saved', saved.includes(id)); button.setAttribute('aria-pressed', saved.includes(id)); button.addEventListener('click', event => { event.stopPropagation(); const at = saved.indexOf(id); at === -1 ? saved.push(id) : saved.splice(at, 1); localStorage.setItem('aa-favourites', JSON.stringify(saved)); button.classList.toggle('saved'); button.setAttribute('aria-pressed', String(at === -1)); }); });
