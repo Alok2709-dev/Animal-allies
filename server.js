@@ -19,6 +19,26 @@ const transporter = process.env.SMTP_HOST && process.env.SMTP_USER && process.en
   ? nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } })
   : null;
 
+// Allow the public GitHub Pages frontend and the Animal Allies custom domain to call this API.
+const allowedOrigins = new Set([
+  'https://alok2709-dev.github.io',
+  'https://animalallies.org',
+  'https://www.animalallies.org',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+]);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 app.use(express.json({ limit: '30kb' }));
 app.use('/data', (_req, res) => res.sendStatus(404));
 app.use(express.static(__dirname, { dotfiles: 'deny' }));
