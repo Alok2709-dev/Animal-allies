@@ -178,22 +178,30 @@
     const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'ally.css'; document.head.append(stylesheet);
     const assistant = document.createElement('section');
     assistant.className = 'ally-widget';
-    assistant.innerHTML = '<button class="ally-fab" type="button" aria-expanded="false" aria-controls="allyPanel"><span>✦</span> Ask Ally</button><div class="ally-panel" id="allyPanel" hidden><div class="ally-head"><div><span>✦</span><b>Ally, your care guide</b><small>Concise, safety-first help</small></div><button class="ally-close" type="button" aria-label="Close guide">×</button></div><div class="ally-messages" aria-live="polite"><p class="ally-message ally-bot">Hi, I’m Ally. Ask about safe next steps for an animal, a habitat, or how to help.</p></div><form class="ally-form"><textarea maxlength="600" aria-label="Ask Ally a question" placeholder="How can I help an injured bird?"></textarea><button type="submit" aria-label="Send question">↑</button></form><p class="ally-limit">AI answers are brief to conserve costs. Not a veterinary service.</p></div>';
+    assistant.innerHTML = '<button class="ally-fab" type="button" aria-expanded="false" aria-controls="allyPanel"><span>✦</span> Ask Ally</button><div class="ally-panel" id="allyPanel" hidden><div class="ally-head"><div><span>✦</span><b>Ally, your care guide</b><small>Practical help for animals, step by step</small></div><div class="ally-head-actions"><button class="ally-new" type="button" aria-label="Start a new chat" title="New chat">↻</button><button class="ally-close" type="button" aria-label="Close guide">×</button></div></div><div class="ally-messages" aria-live="polite"><p class="ally-message ally-bot">Hi, I’m Ally! 🐾 Tell me what happened and I’ll help you work out safe next steps.</p><div class="ally-suggestions"><button type="button">🐕 Injured animal</button><button type="button">🩸 Bleeding or hurt</button><button type="button">📍 Find local help</button></div></div><form class="ally-form"><textarea maxlength="600" aria-label="Ask Ally a question" placeholder="Tell Ally what happened…" rows="1"></textarea><button type="submit" aria-label="Send question">↑</button></form><p class="ally-limit">AI guidance, not a veterinary diagnosis. For emergencies, contact a vet or local rescue.</p></div>';
     document.body.append(assistant);
-    const fab = $('.ally-fab', assistant), panel = $('.ally-panel', assistant), close = $('.ally-close', assistant), form = $('.ally-form', assistant), input = $('textarea', form), messages = $('.ally-messages', assistant);
+    const fab = $('.ally-fab', assistant), panel = $('.ally-panel', assistant), close = $('.ally-close', assistant), newChat = $('.ally-new', assistant), form = $('.ally-form', assistant), input = $('textarea', form), send = $('button[type="submit"]', form), messages = $('.ally-messages', assistant);
     const toggle = open => { panel.hidden = !open; fab.setAttribute('aria-expanded', String(open)); if (open) input.focus(); };
-    fab.addEventListener('click', () => toggle(panel.hidden)); close.addEventListener('click', () => toggle(false));
-    form.addEventListener('submit', async event => {
-      event.preventDefault(); const message = input.value.trim(); if (!message) return;
-      const user = document.createElement('p'); user.className = 'ally-message ally-user'; user.textContent = message; messages.append(user); input.value = '';
-      const waiting = document.createElement('p'); waiting.className = 'ally-message ally-bot ally-waiting'; waiting.textContent = 'Thinking…'; messages.append(waiting); messages.scrollTop = messages.scrollHeight;
+    const scrollMessages = () => { messages.scrollTop = messages.scrollHeight; };
+    const ask = async message => {
+      if (!message || send.disabled) return;
+      const suggestions = $('.ally-suggestions', messages); suggestions?.remove();
+      const user = document.createElement('p'); user.className = 'ally-message ally-user'; user.textContent = message; messages.append(user);
+      const waiting = document.createElement('p'); waiting.className = 'ally-message ally-bot ally-waiting'; waiting.innerHTML = '<span class="ally-dots"><i></i><i></i><i></i></span> Ally is thinking through the safest next steps…'; messages.append(waiting); send.disabled = true; input.disabled = true; scrollMessages();
       try {
         const apiBase = (window.ANIMAL_ALLIES_API_BASE || 'https://animal-allies-api-production.up.railway.app').replace(/\/$/, '');
         const response = await fetch(`${apiBase}/api/ask-ally`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
-        const result = await response.json(); if (!response.ok) throw new Error(result.error);
-        waiting.textContent = result.answer;
-      } catch (error) { waiting.textContent = error.message || 'I am unavailable right now. Please try again shortly.'; }
-      waiting.classList.remove('ally-waiting'); messages.scrollTop = messages.scrollHeight;
-    });
+        const result = await response.json(); if (!response.ok) throw new Error(result.error || 'The guide is unavailable right now.');
+        waiting.textContent = result.answer || 'I could not form a full answer just now. Please try again.';
+      } catch (error) { waiting.textContent = error.message || 'I could not connect just now. Please try again shortly.'; }
+      waiting.classList.remove('ally-waiting'); send.disabled = false; input.disabled = false; input.focus(); scrollMessages();
+    };
+    const suggestions = $('.ally-suggestions', messages);
+    suggestions?.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { input.value = button.textContent.replace(/^\S+\s*/, ''); input.focus(); }));
+    fab.addEventListener('click', () => toggle(panel.hidden)); close.addEventListener('click', () => toggle(false));
+    newChat.addEventListener('click', () => { messages.innerHTML = '<p class="ally-message ally-bot">Fresh start! 🐾 Tell me what happened and I’ll help with safe next steps.</p><div class="ally-suggestions"><button type="button">🐕 Injured animal</button><button type="button">🩸 Bleeding or hurt</button><button type="button">📍 Find local help</button></div>'; messages.querySelectorAll('.ally-suggestions button').forEach(button => button.addEventListener('click', () => { input.value = button.textContent.replace(/^\S+\s*/, ''); input.focus(); })); input.value = ''; input.disabled = false; send.disabled = false; scrollMessages(); input.focus(); });
+    input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 110) + 'px'; });
+    form.addEventListener('submit', async event => { event.preventDefault(); const message = input.value.trim(); if (!message) return; input.value = ''; input.style.height = 'auto'; await ask(message); });
+    input.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
   }
 })();
