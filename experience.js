@@ -188,7 +188,8 @@
       const user = document.createElement('p'); user.className = 'ally-message ally-user'; user.textContent = message; messages.append(user); input.value = '';
       const waiting = document.createElement('p'); waiting.className = 'ally-message ally-bot ally-waiting'; waiting.textContent = 'Thinking…'; messages.append(waiting); messages.scrollTop = messages.scrollHeight;
       try {
-        const response = await fetch('/api/ask-ally', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+        const apiBase = (window.ANIMAL_ALLIES_API_BASE || '').replace(/\/$/, '');
+        const response = await fetch(`${apiBase}/api/ask-ally`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error);
         waiting.textContent = result.answer;
       } catch (error) { waiting.textContent = error.message || 'I am unavailable right now. Please try again shortly.'; }
