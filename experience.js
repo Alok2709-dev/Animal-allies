@@ -24,8 +24,36 @@
   cards.forEach(card => card.addEventListener('mouseleave', () => card.style.transform = ''));
   const contactForms = $$('form[data-demo-form]');
   contactForms.forEach(form => form.addEventListener('submit', event => { event.preventDefault(); const note = $('.form-note', form); if (note) { note.textContent = 'Thanks — your message has been prepared. Connect this form to your email service to send it live.'; note.style.color = '#1f7048'; } }));
-  // Rescue reports use the hosted FormSubmit endpoint in report-injured-animal.html.
-  // Do not intercept the form here: this site is hosted on static GitHub Pages.
+  // Submit rescue reports through FormSubmit's AJAX endpoint (GitHub Pages has no server runtime).
+  const rescueForm = $('form[data-rescue-form]');
+  rescueForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submit = $('button[type="submit"]', rescueForm);
+    const note = $('.form-note', rescueForm);
+    const originalText = 'Send rescue report →';
+    submit.disabled = true;
+    submit.textContent = 'Sending report…';
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/animalallies11@gmail.com', {
+        method: 'POST',
+        body: new FormData(rescueForm),
+        headers: { 'Accept': 'application/json' }
+      });
+      const result = await response.json();
+      if (!response.ok || result.success === 'false' || result.success === false) {
+        throw new Error(result.message || 'Email service did not accept the report.');
+      }
+      rescueForm.reset();
+      note.textContent = 'Report submitted. Please check your email for delivery confirmation. For urgent cases, call or WhatsApp the rescue line.';
+      note.style.color = '#1f7048';
+    } catch (error) {
+      note.textContent = 'Could not send the report. Please call or WhatsApp the rescue line now, then try again later.';
+      note.style.color = '#ae291e';
+    } finally {
+      submit.disabled = false;
+      submit.textContent = originalText;
+    }
+  });
   if (!document.body.classList.contains('auth-page')) {
     const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'ally.css'; document.head.append(stylesheet);
     const assistant = document.createElement('section');
