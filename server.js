@@ -113,8 +113,32 @@ app.post('/api/ask-ally', async (req, res) => {
       }
       await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
     }
-    const answer = result.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    let answer = result.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    let finishReason = result.candidates?.[0]?.finishReason || '';
     if (!answer) throw new Error('Gemini returned an empty answer.');
+
+    // Some model responses stop mid-sentence. Detect likely truncation and ask once for a complete rewrite.
+    const looksIncomplete = !/[.!?।]["'”’)]?\\s*$/.test(answer) || ['MAX_TOKENS', 'OTHER'].includes(finishReason);
+    if (looksIncomplete) {
+      const repair = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: "You are Ally, a practical, compassionate animal-welfare first-response guide. Reply in the same language as the user. Give complete, safe, actionable guidance in 6–9 short sentences. Never end mid-sentence. Keep people away from dangerous animals and recommend a vet or local rescue for serious injuries. Do not diagnose or prescribe medicine." }]
+          },
+          contents: [{ role: 'user', parts: [{ text: `The user's question was: "${message}". A previous draft was cut off and must not be repeated as an unfinished answer. Write a fresh, complete answer from the beginning, about 100–170 words, with a clear final sentence. Answer in natural Hindi/Hinglish if the question is in Hindi/Hinglish. Do not mention that you are rewriting anything.` }] }],
+          generationConfig: { maxOutputTokens: 900, temperature: 0.3 }
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
+      if (repair.ok) {
+        const repaired = await repair.json().catch(() => ({}));
+        const candidate = repaired.candidates?.[0];
+        const full = candidate?.content?.parts?.map(part => part.text || '').join('').trim();
+        if (full && /[.!?।]["'”’)]?\\s*$/.test(full)) answer = full;
+      }
+    }
     res.json({ answer });
   } catch (error) {
     console.error('Gemini assistant error:', error.message);
