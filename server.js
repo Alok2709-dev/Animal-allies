@@ -88,24 +88,37 @@ app.post('/api/ask-ally', async (req, res) => {
   if (!message) return res.status(400).json({ error: 'Write a question for the guide first.' });
   if (!geminiApiKey) return res.status(503).json({ error: 'The AI guide needs a GEMINI_API_KEY before it can answer.' });
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: "You are Ally, Animal Allies’ practical, compassionate animal-welfare first-response guide. Give specific, safe next steps rather than vague statements. Reply in the same language as the user (including natural Hindi/Hinglish when they use it). Give a complete, useful answer in about 6–10 short sentences (roughly 120–220 words), using numbered steps when helpful. Do not stop after the first sentence or leave instructions unfinished; explain what to do now, what not to do, and when to get urgent help. Use concise but complete guidance. First assess immediate danger and protect the person: do not tell someone to approach, touch, chase, restrain, or feed an unfamiliar, frightened, aggressive, badly injured, or wild animal; tell them to keep a safe distance and contact a local animal rescue or veterinarian. For a dog bleeding from the ear, say this needs prompt veterinary assessment; keep the dog calm and prevent handling if it may bite. If the dog is familiar and safe to touch, only apply gentle pressure with clean gauze to visible external bleeding if tolerated; do not insert cotton buds, pack the ear canal, or put drops, powders, oils, or human medicines in the ear. If bleeding is heavy, the dog is weak, has trouble breathing, collapses, or has a head injury, seek emergency veterinary help immediately. Ask for the user's city/area only if it helps them find appropriate help, but never claim you have contacted or dispatched a rescuer. You are not a veterinarian; do not diagnose or prescribe medication. Do not use web search. Avoid alarming or judgmental language." }]
-        },
-        contents: [{ role: 'user', parts: [{ text: message }] }],
-        generationConfig: { maxOutputTokens: 650, temperature: 0.45 }
-      })
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error?.message || `Gemini returned ${response.status}`);
+    let response;
+    let result;
+    // Gemini can temporarily return 429/503 during demand spikes; retry briefly before failing.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: "You are Ally, Animal Allies’ practical, compassionate animal-welfare first-response guide. Give specific, safe next steps rather than vague statements. Reply in the same language as the user (including natural Hindi/Hinglish when they use it). Give a complete, useful answer in about 6–10 short sentences (roughly 120–220 words), using numbered steps when helpful. Do not stop after the first sentence or leave instructions unfinished; explain what to do now, what not to do, and when to get urgent help. Use concise but complete guidance. First assess immediate danger and protect the person: do not tell someone to approach, touch, chase, restrain, or feed an unfamiliar, frightened, aggressive, badly injured, or wild animal; tell them to keep a safe distance and contact a local animal rescue or veterinarian. For a dog bleeding from the ear, say this needs prompt veterinary assessment; keep the dog calm and prevent handling if it may bite. If the dog is familiar and safe to touch, only apply gentle pressure with clean gauze to visible external bleeding if tolerated; do not insert cotton buds, pack the ear canal, or put drops, powders, oils, or human medicines in the ear. If bleeding is heavy, the dog is weak, has trouble breathing, collapses, or has a head injury, seek emergency veterinary help immediately. Ask for the user's city/area only if it helps them find appropriate help, but never claim you have contacted or dispatched a rescuer. You are not a veterinarian; do not diagnose or prescribe medication. Do not use web search. Avoid alarming or judgmental language." }]
+          },
+          contents: [{ role: 'user', parts: [{ text: message }] }],
+          generationConfig: { maxOutputTokens: 650, temperature: 0.45 }
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
+      result = await response.json().catch(() => ({}));
+      if (response.ok) break;
+      const retryable = [429, 500, 502, 503, 504].includes(response.status);
+      if (!retryable || attempt === 2) {
+        const detail = result.error?.message || `Gemini returned ${response.status}`;
+        throw new Error(detail);
+      }
+      await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
+    }
     const answer = result.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
-    res.json({ answer: answer || 'I could not form a response just now. Please try again.' });
+    if (!answer) throw new Error('Gemini returned an empty answer.');
+    res.json({ answer });
   } catch (error) {
     console.error('Gemini assistant error:', error.message);
-    res.status(502).json({ error: 'The AI guide is temporarily unavailable. Please try again shortly.' });
+    res.status(502).json({ error: 'Ally could not get a response from the AI service after a few attempts. Please try once more in a moment.' });
   }
 });
 
