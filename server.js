@@ -12,7 +12,7 @@ const razorpay = keyId && keySecret ? new Razorpay({ key_id: keyId, key_secret: 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const rescueEmail = process.env.RESCUE_ALERT_TO;
 const rescueSms = process.env.RESCUE_ALERT_SMS_TO;
-const chatModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const chatModel = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const rateWindows = new Map();
 const transporter = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   ? nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } })
