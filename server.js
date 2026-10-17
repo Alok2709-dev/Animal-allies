@@ -3,17 +3,16 @@ const crypto = require('crypto');
 const express = require('express');
 const Razorpay = require('razorpay');
 const nodemailer = require('nodemailer');
-const OpenAI = require('openai');
 
 const app = express();
 const configuredPort = Number(process.env.PORT || 3000);
 const keyId = process.env.RAZORPAY_KEY_ID;
 const keySecret = process.env.RAZORPAY_KEY_SECRET;
 const razorpay = keyId && keySecret ? new Razorpay({ key_id: keyId, key_secret: keySecret }) : null;
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const geminiApiKey = process.env.GEMINI_API_KEY;
 const rescueEmail = process.env.RESCUE_ALERT_TO;
 const rescueSms = process.env.RESCUE_ALERT_SMS_TO;
-const chatModel = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+const chatModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const rateWindows = new Map();
 const transporter = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   ? nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } })
@@ -87,16 +86,25 @@ app.post('/api/ask-ally', async (req, res) => {
   if (!allowRequest(req, 'assistant', Number(process.env.AI_MAX_REQUESTS_PER_HOUR || 20), 60 * 60 * 1000)) return res.status(429).json({ error: 'The guide has reached its hourly question limit. Please try again later.' });
   const message = safe(req.body.message, 600);
   if (!message) return res.status(400).json({ error: 'Write a question for the guide first.' });
-  if (!openai) return res.status(503).json({ error: 'The AI guide needs an OPENAI_API_KEY before it can answer.' });
+  if (!geminiApiKey) return res.status(503).json({ error: 'The AI guide needs a GEMINI_API_KEY before it can answer.' });
   try {
-    const response = await openai.responses.create({
-      model: chatModel, store: false, reasoning: { effort: 'none' }, max_output_tokens: 240, text: { verbosity: 'low' },
-      instructions: 'You are Ally, Animal Allies’ concise, calm animal-welfare guide. Answer in plain language in 3 short paragraphs or fewer. Ask one clarifying question only when needed. For an injured, trapped, aggressive, or dangerous animal, prioritise human safety: do not advise handling wildlife or biting animals; tell the person to keep distance and call local rescue, a veterinarian, or emergency services. You are not a vet and cannot diagnose or prescribe treatment. Never claim a rescue has been dispatched. Do not use web search. Keep the response under 150 words.',
-      input: message
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: 'You are Ally, Animal Allies’ concise, calm animal-welfare guide. Answer in plain language in 3 short paragraphs or fewer. Ask one clarifying question only when needed. For an injured, trapped, aggressive, or dangerous animal, prioritise human safety: do not advise handling wildlife or biting animals; tell the person to keep distance and call local rescue, a veterinarian, or emergency services. You are not a vet and cannot diagnose or prescribe treatment. Never claim a rescue has been dispatched. Do not use web search. Keep the response under 150 words.' }]
+        },
+        contents: [{ role: 'user', parts: [{ text: message }] }],
+        generationConfig: { maxOutputTokens: 240, temperature: 0.4 }
+      })
     });
-    res.json({ answer: response.output_text || 'I could not form a response just now. Please try again.' });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error?.message || `Gemini returned ${response.status}`);
+    const answer = result.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    res.json({ answer: answer || 'I could not form a response just now. Please try again.' });
   } catch (error) {
-    console.error('OpenAI assistant error:', error.message);
+    console.error('Gemini assistant error:', error.message);
     res.status(502).json({ error: 'The AI guide is temporarily unavailable. Please try again shortly.' });
   }
 });
