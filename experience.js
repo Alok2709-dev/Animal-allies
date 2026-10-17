@@ -26,6 +26,58 @@
   contactForms.forEach(form => form.addEventListener('submit', event => { event.preventDefault(); const note = $('.form-note', form); if (note) { note.textContent = 'Thanks — your message has been prepared. Connect this form to your email service to send it live.'; note.style.color = '#1f7048'; } }));
   // Submit rescue reports through FormSubmit's AJAX endpoint (GitHub Pages has no server runtime).
   const rescueForm = $('form[data-rescue-form]');
+  const locationButton = $('#usePreciseLocation');
+  const locationInput = $('#location');
+  const locationStatus = $('#locationStatus');
+  const latitudeInput = $('#latitude');
+  const longitudeInput = $('#longitude');
+  const mapPreview = $('#mapPreview');
+  const locationMap = $('#locationMap');
+  const openMap = $('#openMap');
+
+  locationButton?.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      if (locationStatus) locationStatus.textContent = 'Precise location is not supported by this browser. Please type the address.';
+      return;
+    }
+    locationButton.disabled = true;
+    locationButton.textContent = 'Finding location…';
+    if (locationStatus) locationStatus.textContent = 'Allow location access in your browser when prompted.';
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const coordinates = `Latitude: ${lat.toFixed(6)}, Longitude: ${lon.toFixed(6)}`;
+      if (latitudeInput) latitudeInput.value = lat.toFixed(6);
+      if (longitudeInput) longitudeInput.value = lon.toFixed(6);
+      if (locationInput) {
+        const existing = locationInput.value.trim();
+        locationInput.value = existing ? `${existing}\n${coordinates}` : coordinates;
+      }
+      const delta = 0.006;
+      if (locationMap) locationMap.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-delta}%2C${lat-delta}%2C${lon+delta}%2C${lat+delta}&layer=mapnik&marker=${lat}%2C${lon}`;
+      if (openMap) openMap.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}`;
+      if (mapPreview) mapPreview.hidden = false;
+      if (locationStatus) locationStatus.textContent = 'Precise coordinates added. You can still edit the address above.';
+      locationButton.disabled = false;
+      locationButton.textContent = '◎ Update my precise location';
+    }, error => {
+      const messages = {
+        1: 'Location permission was denied. Allow it in browser settings or type the address manually.',
+        2: 'Could not determine your location. Try again outdoors or type the address.',
+        3: 'Location request timed out. Please try again.'
+      };
+      if (locationStatus) locationStatus.textContent = messages[error.code] || 'Could not get location. Please type the address manually.';
+      locationButton.disabled = false;
+      locationButton.textContent = '◎ Try precise location again';
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  });
+  rescueForm?.addEventListener('reset', () => {
+    if (latitudeInput) latitudeInput.value = '';
+    if (longitudeInput) longitudeInput.value = '';
+    if (locationStatus) locationStatus.textContent = '';
+    if (mapPreview) mapPreview.hidden = true;
+    if (locationMap) locationMap.removeAttribute('src');
+  });
   rescueForm?.addEventListener('submit', async event => {
     event.preventDefault();
     const submit = $('button[type="submit"]', rescueForm);
