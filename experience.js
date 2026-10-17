@@ -44,7 +44,7 @@
         throw new Error(result.message || 'Email service did not accept the report.');
       }
       rescueForm.reset();
-      note.textContent = 'Report submitted. Please check your email for delivery confirmation. For urgent cases, call or WhatsApp the rescue line.';
+      note.innerHTML = 'Thank you! Your rescue report has been submitted. <a href="https://alok2709-dev.github.io/Animal-allies/index.html">Visit the Animal Allies website</a>. For urgent cases, call or WhatsApp the rescue line.';
       note.style.color = '#1f7048';
     } catch (error) {
       note.textContent = 'Could not send the report. Please call or WhatsApp the rescue line now, then try again later.';
