@@ -175,7 +175,7 @@
     }
   });
   if (!document.body.classList.contains('auth-page')) {
-    const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'ally.css'; document.head.append(stylesheet);
+    const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'ally.css?v=ally-redesign-20261017'; document.head.append(stylesheet);
     const assistant = document.createElement('section');
     assistant.className = 'ally-widget';
     assistant.innerHTML = '<button class="ally-fab" type="button" aria-expanded="false" aria-controls="allyPanel"><span>✦</span> Ask Ally</button><div class="ally-panel" id="allyPanel" hidden><div class="ally-head"><div><span>✦</span><b>Ally, your care guide</b><small>Practical help for animals, step by step</small></div><div class="ally-head-actions"><button class="ally-new" type="button" aria-label="Start a new chat" title="New chat">↻</button><button class="ally-close" type="button" aria-label="Close guide">×</button></div></div><div class="ally-messages" aria-live="polite"><p class="ally-message ally-bot">Hi, I’m Ally! 🐾 Tell me what happened and I’ll help you work out safe next steps.</p><div class="ally-suggestions"><button type="button">🐕 Injured animal</button><button type="button">🩸 Bleeding or hurt</button><button type="button">📍 Find local help</button></div></div><form class="ally-form"><textarea maxlength="600" aria-label="Ask Ally a question" placeholder="Tell Ally what happened…" rows="1"></textarea><button type="submit" aria-label="Send question">↑</button></form><p class="ally-limit">AI guidance, not a veterinary diagnosis. For emergencies, contact a vet or local rescue.</p></div>';
