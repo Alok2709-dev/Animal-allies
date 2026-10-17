@@ -1,5 +1,9 @@
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
+
+  // This page intentionally uses its own script, so reveal elements here too.
+  // Without this, the shared CSS keeps the hero and form invisible.
+  document.querySelectorAll('.reveal').forEach(element => element.classList.add('in-view'));
   const form = $('form[data-rescue-form]');
   const locationButton = $('#usePreciseLocation');
   const locationInput = $('#location');
