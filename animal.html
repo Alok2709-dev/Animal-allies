@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d3423"><meta name="description" content="Animal guide: learn about the animal, its habitat, conservation information and how to respond safely if it needs help.">
+<title>Animal Guide | Animal Allies</title>
+<link rel="stylesheet" href="experience.css?v=animal-guide-20261018">
+<style>
+.animal-page{min-height:100vh;padding:120px 0 70px;background:var(--fog)}.animal-detail-shell{width:min(1060px,calc(100% - 36px));margin:auto}.back-link{display:inline-flex;margin-bottom:26px;color:var(--pine);font-weight:800;text-decoration:none}.animal-detail-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,64px);align-items:start}.animal-detail-image{width:100%;max-height:560px;min-height:300px;object-fit:cover;border-radius:22px;background:var(--mist)}.animal-detail-copy h1{margin:0;font-family:var(--serif);font-size:clamp(2.8rem,6vw,5rem);line-height:.98;letter-spacing:-.06em;overflow-wrap:anywhere}.animal-subtitle{color:var(--muted);line-height:1.7}.animal-detail-copy h2{margin:28px 0 8px;font-family:var(--serif);font-size:1.5rem}.animal-fact-box{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper);line-height:1.65}.animal-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.animal-links .btn{background:var(--forest);color:white}.animal-links .btn.alt{background:var(--lime);color:var(--ink)}.animal-disclaimer{margin-top:18px;color:var(--muted);font-size:.82rem;line-height:1.6}.animal-loading{color:var(--muted);line-height:1.7}.animal-error{padding:18px;border-radius:14px;background:var(--paper);line-height:1.6}
+@media(max-width:720px){.animal-page{padding-top:100px}.animal-detail-layout{grid-template-columns:minmax(0,1fr)}.animal-detail-image{max-height:360px;min-height:220px}.animal-detail-copy h1{font-size:clamp(2.7rem,12vw,4rem)}}
+</style>
+</head>
+<body>
+<header class="site-header scrolled"><div class="shell nav-wrap"><a class="brand" href="index.html"><span class="brand-mark">♥</span>ANIMAL ALLIES</a><nav class="nav-links"><a href="index.html#wild">Discover</a><a href="index.html#wild">Animal guide</a><a href="report-injured-animal.html">Report rescue</a></nav><a class="nav-donate" href="report-injured-animal.html">Get help ↗</a></div></header>
+<main class="animal-page"><div class="animal-detail-shell"><a class="back-link" href="index.html#wild">← Back to animal guide</a>
+<div id="animalDetail" class="animal-loading" aria-live="polite">Loading animal information from Wikipedia…</div>
+</div></main>
+<script>
+(() => {
+ const root=document.getElementById('animalDetail');
+ const params=new URLSearchParams(location.search);
+ const raw=(params.get('animal')||'dog').toLowerCase();
+ const names={dog:'Dog',cat:'Cat',owl:'Owl',cow:'Cattle',street-dog:'Dog',domestic-cat:'Cat'};
+ const title=names[raw]||raw.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function load(){
+  try{
+   const response=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title));
+   if(!response.ok) throw new Error('No summary');
+   const data=await response.json();
+   const pageTitle=data.title||title;
+   const image=data.originalimage?.source||data.thumbnail?.source||'';
+   const summary=data.extract||'Open the reference links below for more information.';
+   const wiki=data.content_urls?.desktop?.page||('https://en.wikipedia.org/wiki/'+encodeURIComponent(pageTitle.replace(/ /g,'_')));
+   const searchUrl='https://www.iucnredlist.org/search?query='+encodeURIComponent(pageTitle);
+   root.className='';
+   root.innerHTML='<div class="animal-detail-layout"><div>'+ (image?'<img class="animal-detail-image" src="'+esc(image)+'" alt="'+esc(pageTitle)+'">':'<div class="animal-detail-image"></div>') +'<p class="animal-disclaimer">Image and introductory summary sourced from Wikipedia. Details may vary by species and location.</p></div><article class="animal-detail-copy"><p class="eyebrow">Animal guide · Learn before helping</p><h1>'+esc(pageTitle)+'</h1><p class="animal-subtitle">'+esc(data.description||'Animal information and practical guidance')+'</p><h2>About this animal</h2><div class="animal-fact-box">'+esc(summary)+'</div><h2>Conservation status</h2><p class="animal-subtitle">Status depends on the exact species and population. We do not label an animal “endangered” without a source for that specific species. Check the IUCN Red List for a verified assessment.</p><div class="animal-links"><a class="btn" href="'+esc(wiki)+'" target="_blank" rel="noopener noreferrer">Read full reference ↗</a><a class="btn alt" href="'+esc(searchUrl)+'" target="_blank" rel="noopener noreferrer">Check IUCN status ↗</a><a class="btn alt" href="report-injured-animal.html">Report an animal in need ↗</a></div><p class="animal-disclaimer">Found an injured animal? Keep a safe distance, avoid feeding or handling wildlife, and contact a qualified local rescuer or veterinarian. This information page is not a live rescue dispatch service.</p></article></div>';
+  }catch(e){
+   root.className='animal-error';
+   root.innerHTML='<h1>'+esc(title)+'</h1><p>We could not load the live animal reference right now. Check your connection and try again.</p><p><a href="https://en.wikipedia.org/wiki/'+encodeURIComponent(title.replace(/ /g,'_'))+'" target="_blank" rel="noopener noreferrer">Open Wikipedia reference ↗</a></p><a class="btn" href="report-injured-animal.html">Report an animal in need</a>';
+  }
+ }
+ load();
+})();
+</script>
+</body></html>
