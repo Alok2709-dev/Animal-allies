@@ -118,7 +118,7 @@ app.post('/api/ask-ally', async (req, res) => {
     if (!answer) throw new Error('Gemini returned an empty answer.');
 
     // Some model responses stop mid-sentence. Detect likely truncation and ask once for a complete rewrite.
-    const looksIncomplete = !/[.!?।]["'”’)]?\\s*$/.test(answer) || ['MAX_TOKENS', 'OTHER'].includes(finishReason);
+    const looksIncomplete = !/[.!?।]["'”’)]?\s*$/.test(answer) || ['MAX_TOKENS', 'OTHER'].includes(finishReason);
     if (looksIncomplete) {
       const repair = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
         method: 'POST',
@@ -136,7 +136,7 @@ app.post('/api/ask-ally', async (req, res) => {
         const repaired = await repair.json().catch(() => ({}));
         const candidate = repaired.candidates?.[0];
         const full = candidate?.content?.parts?.map(part => part.text || '').join('').trim();
-        if (full && /[.!?।]["'”’)]?\\s*$/.test(full)) answer = full;
+        if (full && /[.!?।]["'”’)]?\s*$/.test(full)) answer = full;
       }
     }
     res.json({ answer });
