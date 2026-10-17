@@ -12,7 +12,7 @@
   $$('.reveal').forEach(element => observer.observe(element));
   const statObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (!entry.isIntersecting) return; const target = entry.target; const end = Number(target.dataset.count); const start = performance.now(); const duration = 1300; const frame = time => { const t = Math.min((time - start) / duration, 1), current = Math.floor(end * (1 - Math.pow(1 - t, 3))); target.textContent = current.toLocaleString('en-IN') + (target.dataset.suffix || ''); if (t < 1) requestAnimationFrame(frame); }; requestAnimationFrame(frame); statObserver.unobserve(target); }), { threshold: .45 });
   $$('[data-count]').forEach(element => statObserver.observe(element));
-  const cards = $('.animal-card');
+  const cards = $$('.animal-card');
   const animalDetails = {
     tiger: ['Bengal tiger', 'Panthera tigris', 'Forests and grasslands of the Indian subcontinent', 'Tigers are apex predators that help keep ecosystems balanced. Major threats include habitat loss, poaching and conflict near settlements. Protecting connected forests and reporting wildlife crime helps them survive.'],
     turtle: ['Green turtle', 'Chelonia mydas', 'Tropical and subtropical oceans', 'Green turtles spend most of their lives at sea and depend on healthy marine habitats. Plastic, fishing gear and nesting-beach disturbance are serious threats. Never touch a nesting turtle or disturb hatchlings.'],
