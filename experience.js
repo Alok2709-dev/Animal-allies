@@ -24,21 +24,8 @@
   cards.forEach(card => card.addEventListener('mouseleave', () => card.style.transform = ''));
   const contactForms = $$('form[data-demo-form]');
   contactForms.forEach(form => form.addEventListener('submit', event => { event.preventDefault(); const note = $('.form-note', form); if (note) { note.textContent = 'Thanks — your message has been prepared. Connect this form to your email service to send it live.'; note.style.color = '#1f7048'; } }));
-  const rescueForm = $('form[data-rescue-form]');
-  rescueForm?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const submit = $('button[type="submit"]', rescueForm), note = $('.form-note', rescueForm);
-    submit.disabled = true; submit.textContent = 'Sending alert…';
-    try {
-      const fields = Object.fromEntries(new FormData(rescueForm).entries());
-      const response = await fetch('/api/rescue-reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error);
-      rescueForm.reset(); note.textContent = result.message; note.style.color = '#1f7048';
-    } catch (error) {
-      note.textContent = error.message || 'The alert could not be sent. Please call or WhatsApp the rescue line now.'; note.style.color = '#ae291e';
-    } finally { submit.disabled = false; submit.textContent = 'Send rescue report →'; }
-  });
+  // Rescue reports use the hosted FormSubmit endpoint in report-injured-animal.html.
+  // Do not intercept the form here: this site is hosted on static GitHub Pages.
   if (!document.body.classList.contains('auth-page')) {
     const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'ally.css'; document.head.append(stylesheet);
     const assistant = document.createElement('section');
