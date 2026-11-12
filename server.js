@@ -14,6 +14,25 @@ const rescueEmail = process.env.RESCUE_ALERT_TO;
 const rescueSms = process.env.RESCUE_ALERT_SMS_TO;
 const chatModel = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const rateWindows = new Map();
+
+// ── ZeroPaye config ──────────────────────────────────────────────────────────
+// ZeroPaye is a zero-fee, self-hosted UPI gateway (github.com/DKUMARGUPTA/ZeroPaye).
+// Set the env vars below to enable it. Falls back to plain UPI QR if not configured.
+const zeroPaye = {
+  apiUrl:        process.env.ZEROPAYE_API_URL        || '', // e.g. https://pay.yourdomain.com
+  apiKey:        process.env.ZEROPAYE_API_KEY        || '',
+  webhookSecret: process.env.ZEROPAYE_WEBHOOK_SECRET || '',
+  upiId:         process.env.ZEROPAYE_UPI_ID         || '',
+};
+const zeroPayed = !!(zeroPaye.apiUrl && zeroPaye.apiKey && zeroPaye.upiId);
+// In-memory idempotency store (key → { orderId, amount, createdAt }). Prevents duplicate charges.
+const zpIdempotency = new Map();
+// Prune idempotency entries older than 30 minutes to avoid unbounded growth.
+setInterval(() => {
+  const cutoff = Date.now() - 30 * 60 * 1000;
+  for (const [k, v] of zpIdempotency) if (v.createdAt < cutoff) zpIdempotency.delete(k);
+}, 5 * 60 * 1000);
+
 const transporter = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
   ? nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } })
   : null;
@@ -51,6 +70,29 @@ function allowRequest(req, bucket, max, durationMs) {
 }
 function safe(value, max) { return typeof value === 'string' ? value.trim().replace(/[\r\n]+/g, ' ').slice(0, max) : ''; }
 
+// ── ZeroPaye helper: sign a request payload ──────────────────────────────────
+function zpSign(payload) {
+  return crypto.createHmac('sha256', zeroPaye.apiKey).update(JSON.stringify(payload)).digest('hex');
+}
+
+// ── ZeroPaye helper: call the self-hosted ZeroPaye server ───────────────────
+async function zpFetch(path, payload) {
+  const signature = zpSign(payload);
+  const response = await fetch(`${zeroPaye.apiUrl}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-zeropaye-key': zeroPaye.apiKey,
+      'x-zeropaye-sig': signature,
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(10000),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `ZeroPaye returned ${response.status}`);
+  return data;
+}
+
 async function sendTwilioMessage(body) {
   const { TWILIO_ACCOUNT_SID: sid, TWILIO_AUTH_TOKEN: token, TWILIO_FROM: from } = process.env;
   if (!sid || !token || !from || !rescueSms) return false;
@@ -66,7 +108,7 @@ async function sendTwilioMessage(body) {
 app.post('/api/rescue-reports', async (req, res) => {
   if (!allowRequest(req, 'rescue', 3, 10 * 60 * 1000)) return res.status(429).json({ error: 'Too many reports from this connection. For an urgent case, call or WhatsApp the rescue line.' });
   const report = { name: safe(req.body.name, 80), phone: safe(req.body.phone, 30), email: safe(req.body.email, 120), location: safe(req.body.location, 220), message: safe(req.body.message, 1600) };
-  if (!report.name || !report.phone || !report.email || !report.location || !/^\S+@\S+\.\S+$/.test(report.email)) return res.status(400).json({ error: 'Please include your name, email, phone number, and the animal’s exact location.' });
+  if (!report.name || !report.phone || !report.email || !report.location || !/^\S+@\S+\.\S+$/.test(report.email)) return res.status(400).json({ error: 'Please include your name, email, phone number, and the animal\'s exact location.' });
   if (!transporter && !rescueSms) return res.status(503).json({ error: 'Rescue alerts have not been configured yet. Please call or WhatsApp the rescue line for immediate help.' });
   const plain = `New Animal Allies rescue report\n\nReporter: ${report.name}\nPhone: ${report.phone}\nEmail: ${report.email}\nLocation: ${report.location}\n\nWhat happened:\n${report.message || 'No additional details'}`;
   const sms = `Animal Allies rescue: ${report.location}. Reporter ${report.name}, ${report.phone}. ${(report.message || 'No details').slice(0, 240)}`;
@@ -97,7 +139,7 @@ app.post('/api/ask-ally', async (req, res) => {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
         body: JSON.stringify({
           systemInstruction: {
-            parts: [{ text: "You are Ally, Animal Allies’ practical, compassionate animal-welfare first-response guide. Give specific, safe next steps rather than vague statements. Reply in the same language as the user (including natural Hindi/Hinglish when they use it). Give a complete, useful answer in about 6–10 short sentences (roughly 120–220 words), using numbered steps when helpful. Do not stop after the first sentence or leave instructions unfinished; explain what to do now, what not to do, and when to get urgent help. Use concise but complete guidance. First assess immediate danger and protect the person: do not tell someone to approach, touch, chase, restrain, or feed an unfamiliar, frightened, aggressive, badly injured, or wild animal; tell them to keep a safe distance and contact a local animal rescue or veterinarian. For a dog bleeding from the ear, say this needs prompt veterinary assessment; keep the dog calm and prevent handling if it may bite. If the dog is familiar and safe to touch, only apply gentle pressure with clean gauze to visible external bleeding if tolerated; do not insert cotton buds, pack the ear canal, or put drops, powders, oils, or human medicines in the ear. If bleeding is heavy, the dog is weak, has trouble breathing, collapses, or has a head injury, seek emergency veterinary help immediately. Ask for the user's city/area only if it helps them find appropriate help, but never claim you have contacted or dispatched a rescuer. You are not a veterinarian; do not diagnose or prescribe medication. Do not use web search. Avoid alarming or judgmental language." }]
+            parts: [{ text: "You are Ally, Animal Allies' practical, compassionate animal-welfare first-response guide. Give specific, safe next steps rather than vague statements. Reply in the same language as the user (including natural Hindi/Hinglish when they use it). Give a complete, useful answer in about 6–10 short sentences (roughly 120–220 words), using numbered steps when helpful. Do not stop after the first sentence or leave instructions unfinished; explain what to do now, what not to do, and when to get urgent help. Use concise but complete guidance. First assess immediate danger and protect the person: do not tell someone to approach, touch, chase, restrain, or feed an unfamiliar, frightened, aggressive, badly injured, or wild animal; tell them to keep a safe distance and contact a local animal rescue or veterinarian. For a dog bleeding from the ear, say this needs prompt veterinary assessment; keep the dog calm and prevent handling if it may bite. If the dog is familiar and safe to touch, only apply gentle pressure with clean gauze to visible external bleeding if tolerated; do not insert cotton buds, pack the ear canal, or put drops, powders, oils, or human medicines in the ear. If bleeding is heavy, the dog is weak, has trouble breathing, collapses, or has a head injury, seek emergency veterinary help immediately. Ask for the user's city/area only if it helps them find appropriate help, but never claim you have contacted or dispatched a rescuer. You are not a veterinarian; do not diagnose or prescribe medication. Do not use web search. Avoid alarming or judgmental language." }]
           },
           contents: [{ role: 'user', parts: [{ text: message }] }],
           generationConfig: { maxOutputTokens: 650, temperature: 0.45 }
@@ -118,7 +160,7 @@ app.post('/api/ask-ally', async (req, res) => {
     if (!answer) throw new Error('Gemini returned an empty answer.');
 
     // Some model responses stop mid-sentence. Detect likely truncation and ask once for a complete rewrite.
-    const looksIncomplete = !/[.!?।]["'”’)]?\s*$/.test(answer) || ['MAX_TOKENS', 'OTHER'].includes(finishReason);
+    const looksIncomplete = !/[.!?।]["'"')]?\s*$/.test(answer) || ['MAX_TOKENS', 'OTHER'].includes(finishReason);
     if (looksIncomplete) {
       const repair = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chatModel)}:generateContent`, {
         method: 'POST',
@@ -136,7 +178,7 @@ app.post('/api/ask-ally', async (req, res) => {
         const repaired = await repair.json().catch(() => ({}));
         const candidate = repaired.candidates?.[0];
         const full = candidate?.content?.parts?.map(part => part.text || '').join('').trim();
-        if (full && /[.!?।]["'”’)]?\s*$/.test(full)) answer = full;
+        if (full && /[.!?।]["'"')]?\s*$/.test(full)) answer = full;
       }
     }
     res.json({ answer });
@@ -146,6 +188,7 @@ app.post('/api/ask-ally', async (req, res) => {
   }
 });
 
+// ── Razorpay: create order ───────────────────────────────────────────────────
 app.post('/api/create-order', async (req, res) => {
   const amount = Number(req.body.amount);
   if (!Number.isInteger(amount) || amount < 100 || amount > 10000000) return res.status(400).json({ error: 'Choose a donation between ₹1 and ₹1,00,000.' });
@@ -159,6 +202,7 @@ app.post('/api/create-order', async (req, res) => {
   }
 });
 
+// ── Razorpay: verify payment signature ──────────────────────────────────────
 app.post('/api/verify-payment', (req, res) => {
   if (!keySecret) return res.status(503).json({ error: 'Secure checkout is not configured yet.' });
   const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature } = req.body;
@@ -169,9 +213,132 @@ app.post('/api/verify-payment', (req, res) => {
   res.json({ verified: true });
 });
 
+// ────────────────────────────────────────────────────────────────────────────
+// ZeroPaye API routes
+// See: github.com/DKUMARGUPTA/ZeroPaye
+// All three endpoints are no-ops (503) when ZEROPAYE_API_URL is not set.
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/zeropaye/create
+ * Creates a ZeroPaye payment session on the self-hosted ZeroPaye server.
+ * Returns { orderId, upiLink, upiId, amount } to the frontend.
+ * Uses an idempotency key (supplied by client) to prevent duplicate orders.
+ */
+app.post('/api/zeropaye/create', async (req, res) => {
+  if (!zeroPayed) return res.status(503).json({ error: 'ZeroPaye is not configured on this server. Use the UPI QR code or Razorpay checkout instead.' });
+  if (!allowRequest(req, 'zp-create', 10, 60 * 1000)) return res.status(429).json({ error: 'Too many payment requests. Please wait a moment and try again.' });
+
+  const amount = Number(req.body.amount);                      // amount in rupees (not paise)
+  const idempotencyKey = safe(req.body.idempotencyKey, 64);    // client-generated UUID
+
+  if (!Number.isFinite(amount) || amount < 1 || amount > 100000)
+    return res.status(400).json({ error: 'Choose a donation between ₹1 and ₹1,00,000.' });
+  if (!idempotencyKey)
+    return res.status(400).json({ error: 'An idempotency key is required.' });
+
+  // Return cached result for duplicate requests within the idempotency window.
+  if (zpIdempotency.has(idempotencyKey)) {
+    return res.json(zpIdempotency.get(idempotencyKey).result);
+  }
+
+  try {
+    const payload = {
+      amount,
+      currency: 'INR',
+      upiId: zeroPaye.upiId,
+      receipt: `aa_${Date.now()}`,
+      description: 'Animal Allies donation',
+    };
+    const data = await zpFetch('/api/orders/create', payload);
+    // ZeroPaye responds with { orderId, upiLink, upiId, amount }
+    const result = {
+      orderId:  data.orderId,
+      upiLink:  data.upiLink,  // deep-link for mobile UPI apps
+      upiId:    zeroPaye.upiId,
+      amount,
+    };
+    zpIdempotency.set(idempotencyKey, { result, createdAt: Date.now() });
+    res.json(result);
+  } catch (error) {
+    console.error('ZeroPaye create error:', error.message);
+    res.status(502).json({ error: 'Could not create a ZeroPaye payment session. Please try UPI QR or Razorpay instead.' });
+  }
+});
+
+/**
+ * POST /api/zeropaye/status
+ * Polls the ZeroPaye server for the payment status of a given orderId.
+ * Returns { status: 'pending' | 'paid' | 'failed', orderId, amount? }
+ */
+app.post('/api/zeropaye/status', async (req, res) => {
+  if (!zeroPayed) return res.status(503).json({ error: 'ZeroPaye is not configured.' });
+  if (!allowRequest(req, 'zp-status', 30, 60 * 1000)) return res.status(429).json({ error: 'Polling too fast. Please slow down.' });
+
+  const orderId = safe(req.body.orderId, 128);
+  if (!orderId) return res.status(400).json({ error: 'orderId is required.' });
+
+  try {
+    const data = await zpFetch('/api/orders/status', { orderId });
+    // ZeroPaye responds with { status, orderId, amount, paidAt? }
+    res.json({ status: data.status, orderId: data.orderId, amount: data.amount });
+  } catch (error) {
+    console.error('ZeroPaye status error:', error.message);
+    res.status(502).json({ error: 'Could not fetch payment status from ZeroPaye.' });
+  }
+});
+
+/**
+ * POST /api/zeropaye/webhook
+ * Receives signed server-side payment confirmation from the ZeroPaye server.
+ * Verifies the HMAC-SHA256 signature using ZEROPAYE_WEBHOOK_SECRET before trusting it.
+ * Returns { received: true } on success.
+ */
+app.post('/api/zeropaye/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  if (!zeroPaye.webhookSecret) {
+    console.warn('ZeroPaye webhook received but ZEROPAYE_WEBHOOK_SECRET is not set — skipping verification.');
+    return res.sendStatus(200);
+  }
+
+  const receivedSig = req.headers['x-zeropaye-sig'] || '';
+  const body = req.body;                             // raw Buffer (express.raw above)
+  const expectedSig = crypto
+    .createHmac('sha256', zeroPaye.webhookSecret)
+    .update(body)
+    .digest('hex');
+
+  // Use timing-safe comparison to prevent timing attacks.
+  const sigA = Buffer.from(receivedSig, 'hex');
+  const sigB = Buffer.from(expectedSig, 'hex');
+  if (sigA.length !== sigB.length || !crypto.timingSafeEqual(sigA, sigB)) {
+    console.warn('ZeroPaye webhook: signature mismatch — ignoring.');
+    return res.status(400).json({ error: 'Webhook signature did not match.' });
+  }
+
+  let event;
+  try { event = JSON.parse(body.toString()); } catch { return res.status(400).json({ error: 'Invalid JSON in webhook body.' }); }
+
+  // Log confirmed payments. Extend here to persist to a DB or send a receipt email.
+  if (event.type === 'payment.confirmed') {
+    console.log(`ZeroPaye confirmed payment: orderId=${event.orderId}, amount=₹${event.amount}`);
+  }
+
+  res.json({ received: true });
+});
+
+// ── Capability probe: lets the frontend know what payment options are live ───
+app.get('/api/payment-capabilities', (_req, res) => {
+  res.json({
+    razorpay:  !!razorpay,
+    zeroPaye:  zeroPayed,
+    zeroPaye_upiId: zeroPayed ? zeroPaye.upiId : null,
+  });
+});
+
 const startServer = (port, attempt = 0) => {
   const server = app.listen(port, () => {
     console.log(`Animal Allies running at http://localhost:${port}`);
+    if (zeroPayed) console.log(`ZeroPaye gateway active → ${zeroPaye.apiUrl}`);
   });
 
   server.on('error', (error) => {
