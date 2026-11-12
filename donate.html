@@ -9,35 +9,118 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
   <script src="payment-config.js" defer></script>
   <style>
-    :root{--ink:#10271d;--forest:#123b2a;--leaf:#22764d;--lime:#cce67b;--paper:#fffdf8;--mist:#f3f8f0;--muted:#687a6d;--line:#dce8df;--red:#ad2218;--gold:#b8860b}*{box-sizing:border-box}body{margin:0;background:var(--mist);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}.topbar{height:72px;display:flex;justify-content:space-between;align-items:center;padding:0 max(24px,calc((100% - 1180px)/2));background:var(--forest);color:#fff}.brand{color:#fff;text-decoration:none;font-size:.82rem;font-weight:850;letter-spacing:.14em}.brand b{display:inline-grid;place-items:center;width:29px;height:29px;margin-right:8px;border-radius:50%;background:var(--lime);color:var(--forest);letter-spacing:0}.back{color:#def0e2;font-size:.9rem;text-underline-offset:4px}.hero{position:relative;overflow:hidden;padding:70px 24px 110px;color:#fff;background:linear-gradient(125deg,#0e3021,#174a32 56%,#276f4c)}.hero:before{content:"";position:absolute;right:-100px;top:-365px;width:530px;height:530px;border-radius:50%;background:rgba(204,230,123,.17)}.hero-inner{position:relative;max-width:1180px;margin:auto}.eyebrow{margin:0 0 15px;color:var(--lime);font-size:.75rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}.eyebrow:before{content:"";display:inline-block;width:22px;height:1px;margin:0 8px 4px 0;background:currentColor}h1,h2,h3{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.035em}h1{max-width:720px;margin:0;font-size:clamp(2.7rem,6vw,5.4rem);font-weight:600;line-height:.97}.hero p:last-child{max-width:570px;margin:23px 0 0;color:#dbece0;font-size:1.06rem;line-height:1.65}.checkout{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;max-width:1180px;margin:-61px auto 0;padding:0 24px 64px}.panel{border:1px solid rgba(18,59,42,.08);border-radius:22px;background:var(--paper);box-shadow:0 18px 45px rgba(14,47,31,.13)}.payment-panel{padding:34px}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:26px}h2{margin:0;font-size:1.8rem}h3{margin:0;font-size:1.2rem}.sub{margin:8px 0 0;color:var(--muted);font-size:.88rem}.secure{padding:7px 10px;border-radius:99px;background:#e5f4df;color:#17633f;font-size:.74rem;font-weight:800;white-space:nowrap}.label{display:block;margin-bottom:10px;color:#40584a;font-size:.82rem;font-weight:800}.amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.amount-choice{min-height:47px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--forest);font-weight:800;transition:.2s}.amount-choice:hover,.amount-choice[aria-pressed=true]{border-color:var(--forest);background:var(--forest);color:#fff;transform:translateY(-2px)}.custom{position:relative;margin-top:11px}.custom span{position:absolute;top:50%;left:15px;transform:translateY(-50%);color:var(--muted);font-weight:800}input{width:100%;height:53px;padding:0 16px 0 34px;outline:0;border:1px solid var(--line);border-radius:11px;color:var(--ink);font-size:1.05rem;font-weight:750}input:focus{border-color:var(--leaf);box-shadow:0 0 0 4px rgba(34,118,77,.12)}.divider{height:1px;margin:31px 0;background:var(--line)}.methods{display:grid;grid-template-columns:1fr 1fr;gap:11px}.method{display:flex;align-items:center;gap:12px;min-height:74px;padding:13px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);text-align:left;transition:.2s}.method:hover,.method.active{border-color:var(--leaf);background:#f5fbf1;box-shadow:0 5px 14px rgba(18,59,42,.07)}.method-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:#e7f2e5;color:var(--forest);font-size:.8rem;font-weight:900}.method strong,.method small{display:block}.method strong{font-size:.87rem}.method small{margin-top:2px;color:var(--muted);font-size:.72rem}.method-content{margin-top:18px;padding:19px;border:1px solid #d9e9d8;border-radius:15px;background:#f8fcf6}.upi-layout{display:flex;align-items:center;gap:19px}.qr{display:grid;place-items:center;flex:0 0 144px;width:144px;height:144px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}.qr img,.qr canvas{max-width:100%}.upi-copy p{margin:7px 0;color:var(--muted);font-size:.85rem;line-height:1.45}.upi-id{display:inline-block;padding:8px 10px;border-radius:8px;background:#e6f3e7;color:#174c34;font-family:ui-monospace,monospace;font-size:.81rem;font-weight:750}.copy{margin-top:10px;padding:0;border:0;background:none;color:var(--leaf);font-size:.82rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}.pay{width:100%;min-height:55px;margin-top:20px;border:0;border-radius:12px;background:var(--lime);color:#0d2b1e;box-shadow:0 9px 18px rgba(94,133,30,.18);font-weight:850;transition:.2s}.pay:hover{background:#d9ee98;transform:translateY(-2px)}.pay:disabled{cursor:not-allowed;opacity:.55}.micro{margin:13px 0 0;color:var(--muted);text-align:center;font-size:.75rem;line-height:1.45}.error{display:none;margin:14px 0 0;color:var(--red);font-size:.82rem;font-weight:700}.error.show{display:block}
+    :root{--ink:#10271d;--forest:#123b2a;--leaf:#22764d;--lime:#cce67b;--paper:#fffdf8;--mist:#f3f8f0;--muted:#687a6d;--line:#dce8df;--red:#ad2218}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--mist);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input{font:inherit}button{cursor:pointer}
+    .topbar{height:72px;display:flex;justify-content:space-between;align-items:center;padding:0 max(24px,calc((100% - 1180px)/2));background:var(--forest);color:#fff}
+    .brand{color:#fff;text-decoration:none;font-size:.82rem;font-weight:850;letter-spacing:.14em}
+    .brand b{display:inline-grid;place-items:center;width:29px;height:29px;margin-right:8px;border-radius:50%;background:var(--lime);color:var(--forest);letter-spacing:0}
+    .back{color:#def0e2;font-size:.9rem;text-underline-offset:4px}
+    .hero{position:relative;overflow:hidden;padding:70px 24px 110px;color:#fff;background:linear-gradient(125deg,#0e3021,#174a32 56%,#276f4c)}
+    .hero:before{content:"";position:absolute;right:-100px;top:-365px;width:530px;height:530px;border-radius:50%;background:rgba(204,230,123,.17)}
+    .hero-inner{position:relative;max-width:1180px;margin:auto}
+    .eyebrow{margin:0 0 15px;color:var(--lime);font-size:.75rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
+    .eyebrow:before{content:"";display:inline-block;width:22px;height:1px;margin:0 8px 4px 0;background:currentColor}
+    h1,h2,h3{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.035em}
+    h1{max-width:720px;margin:0;font-size:clamp(2.7rem,6vw,5.4rem);font-weight:600;line-height:.97}
+    .hero p:last-child{max-width:570px;margin:23px 0 0;color:#dbece0;font-size:1.06rem;line-height:1.65}
+    .checkout{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;max-width:1180px;margin:-61px auto 0;padding:0 24px 64px}
+    .panel{border:1px solid rgba(18,59,42,.08);border-radius:22px;background:var(--paper);box-shadow:0 18px 45px rgba(14,47,31,.13)}
+    .payment-panel{padding:34px}
+    .heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:26px}
+    h2{margin:0;font-size:1.8rem}h3{margin:0;font-size:1.2rem}
+    .sub{margin:8px 0 0;color:var(--muted);font-size:.88rem}
+    .secure{padding:7px 10px;border-radius:99px;background:#e5f4df;color:#17633f;font-size:.74rem;font-weight:800;white-space:nowrap}
+    .label{display:block;margin-bottom:10px;color:#40584a;font-size:.82rem;font-weight:800}
+    .amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+    .amount-choice{min-height:47px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--forest);font-weight:800;transition:.2s}
+    .amount-choice:hover,.amount-choice[aria-pressed=true]{border-color:var(--forest);background:var(--forest);color:#fff;transform:translateY(-2px)}
+    .custom{position:relative;margin-top:11px}
+    .custom span{position:absolute;top:50%;left:15px;transform:translateY(-50%);color:var(--muted);font-weight:800}
+    input{width:100%;height:53px;padding:0 16px 0 34px;outline:0;border:1px solid var(--line);border-radius:11px;color:var(--ink);font-size:1.05rem;font-weight:750}
+    input:focus{border-color:var(--leaf);box-shadow:0 0 0 4px rgba(34,118,77,.12)}
+    .divider{height:1px;margin:31px 0;background:var(--line)}
+    .methods{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .method{display:flex;align-items:center;gap:12px;min-height:74px;padding:13px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);text-align:left;transition:.2s}
+    .method:hover,.method.active{border-color:var(--leaf);background:#f5fbf1;box-shadow:0 5px 14px rgba(18,59,42,.07)}
+    .method-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:#e7f2e5;color:var(--forest);font-size:.8rem;font-weight:900}
+    .method strong,.method small{display:block}.method strong{font-size:.87rem}
+    .method small{margin-top:2px;color:var(--muted);font-size:.72rem}
+    .method-content{margin-top:18px;padding:19px;border:1px solid #d9e9d8;border-radius:15px;background:#f8fcf6}
+    .upi-layout{display:flex;align-items:center;gap:19px}
+    .qr{display:grid;place-items:center;flex:0 0 144px;width:144px;height:144px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .qr img,.qr canvas{max-width:100%}
+    .upi-copy p{margin:7px 0;color:var(--muted);font-size:.85rem;line-height:1.45}
+    .upi-id{display:inline-block;padding:8px 10px;border-radius:8px;background:#e6f3e7;color:#174c34;font-family:ui-monospace,monospace;font-size:.81rem;font-weight:750}
+    .copy{margin-top:10px;padding:0;border:0;background:none;color:var(--leaf);font-size:.82rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+    .pay{width:100%;min-height:55px;margin-top:20px;border:0;border-radius:12px;background:var(--lime);color:#0d2b1e;box-shadow:0 9px 18px rgba(94,133,30,.18);font-weight:850;transition:.2s}
+    .pay:hover{background:#d9ee98;transform:translateY(-2px)}.pay:disabled{cursor:not-allowed;opacity:.55}
+    .micro{margin:13px 0 0;color:var(--muted);text-align:center;font-size:.75rem;line-height:1.45}
+    .error{display:none;margin:14px 0 0;color:var(--red);font-size:.82rem;font-weight:700}.error.show{display:block}
 
-    /* ── ZeroPaye status indicator ─────────────────────────────────────── */
-    .zp-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:#e5f4df;color:#17633f;font-size:.72rem;font-weight:800;margin-bottom:12px}
-    .zp-badge.inactive{background:#f0f0f0;color:#666}
-    .zp-status{margin-top:14px;padding:13px 15px;border-radius:11px;background:#fff;border:1px solid var(--line);font-size:.83rem;display:none}
-    .zp-status.show{display:block}
-    .zp-status.pending{border-color:#cce67b;background:#f8fcf0}
-    .zp-status.paid{border-color:#22764d;background:#edfaf3}
-    .zp-status.failed{border-color:var(--red);background:#fff5f5}
-    .zp-spinner{display:inline-block;width:13px;height:13px;border:2px solid #cce67b;border-top-color:var(--leaf);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    /* ── UPI Confirm Step ─────────────────────────────────────────────── */
+    .confirm-step{display:none;margin-top:18px;padding:20px;border:1px solid #d9e9d8;border-radius:15px;background:#f8fcf6}
+    .confirm-step.show{display:block}
+    .confirm-step h3{margin:0 0 6px;font-size:1.05rem}
+    .confirm-step p{margin:0 0 16px;color:var(--muted);font-size:.84rem;line-height:1.5}
+    .field{margin-bottom:14px}
+    .field label{display:block;margin-bottom:6px;color:#40584a;font-size:.8rem;font-weight:800}
+    .field input{padding:0 14px;font-size:.95rem}
+    .utr-hint{margin-top:5px;color:var(--muted);font-size:.74rem}
+    .ref-tag{display:inline-block;padding:4px 10px;border-radius:6px;background:#e6f3e7;color:#174c34;font-family:ui-monospace,monospace;font-size:.78rem;font-weight:750;margin-bottom:14px}
+    .back-link{display:inline-block;margin-top:10px;padding:0;border:0;background:none;color:var(--muted);font-size:.8rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+    /* ── Spinner ──────────────────────────────────────────────────────── */
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(13,43,30,.2);border-top-color:#0d2b1e;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .zp-tick{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--leaf);color:#fff;text-align:center;line-height:18px;font-size:.7rem;font-weight:900;vertical-align:middle;margin-right:6px}
-    .zp-fee-note{margin-top:9px;padding:8px 11px;border-radius:8px;background:#fffde7;border:1px solid #f0e68c;font-size:.75rem;color:var(--gold)}
 
-    .impact{overflow:hidden;background:var(--forest);color:#fff}.impact-image{position:relative;min-height:180px;background:linear-gradient(0deg,rgba(7,36,23,.6),rgba(7,36,23,.05)),url('https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=850&q=85') center/cover}.impact-image span{position:absolute;bottom:22px;left:25px;font:1.7rem Georgia,serif}.impact-body{padding:26px}.impact-body>p{color:#d3e4d6;line-height:1.6;font-size:.92rem}.impact-list{display:grid;gap:13px;margin-top:22px}.impact-item{display:flex;gap:11px;align-items:flex-start;color:#eef7ed;font-size:.82rem;line-height:1.4}.impact-item b{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;border-radius:50%;background:var(--lime);color:var(--forest);font-size:.75rem}.trust{margin-top:19px;padding-top:18px;border-top:1px solid rgba(255,255,255,.15);color:#bcd2c0;font-size:.75rem;line-height:1.5}.receipt{display:none;padding:44px 20px;text-align:center}.receipt.show{display:block}.mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 17px;border-radius:50%;background:var(--lime);color:#12442e;font-size:1.7rem}.receipt p{max-width:430px;margin:12px auto;color:var(--muted);line-height:1.6}.receipt a{color:var(--leaf);font-weight:800}@media(max-width:800px){.hero{padding:52px 24px 94px}.checkout{grid-template-columns:1fr}.impact{display:none}.payment-panel{padding:26px 20px}.amounts{grid-template-columns:repeat(2,1fr)}.methods{grid-template-columns:1fr}}@media(max-width:440px){.topbar{padding:0 16px}.brand{font-size:.7rem}.hero{padding-left:20px;padding-right:20px}.checkout{padding:0 12px 36px;gap:16px}.heading{display:block}.secure{display:inline-block;margin-top:12px}.upi-layout{align-items:flex-start;gap:12px}.qr{flex-basis:104px;width:104px;height:104px}.upi-id{font-size:.68rem}.method-content{padding:13px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+    .impact{overflow:hidden;background:var(--forest);color:#fff}
+    .impact-image{position:relative;min-height:180px;background:linear-gradient(0deg,rgba(7,36,23,.6),rgba(7,36,23,.05)),url('https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=850&q=85') center/cover}
+    .impact-image span{position:absolute;bottom:22px;left:25px;font:1.7rem Georgia,serif}
+    .impact-body{padding:26px}.impact-body>p{color:#d3e4d6;line-height:1.6;font-size:.92rem}
+    .impact-list{display:grid;gap:13px;margin-top:22px}
+    .impact-item{display:flex;gap:11px;align-items:flex-start;color:#eef7ed;font-size:.82rem;line-height:1.4}
+    .impact-item b{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;border-radius:50%;background:var(--lime);color:var(--forest);font-size:.75rem}
+    .trust{margin-top:19px;padding-top:18px;border-top:1px solid rgba(255,255,255,.15);color:#bcd2c0;font-size:.75rem;line-height:1.5}
+    .receipt{display:none;padding:44px 20px;text-align:center}.receipt.show{display:block}
+    .mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 17px;border-radius:50%;background:var(--lime);color:#12442e;font-size:1.7rem}
+    .receipt p{max-width:430px;margin:12px auto;color:var(--muted);line-height:1.6}.receipt a{color:var(--leaf);font-weight:800}
+    .receipt-ref{margin-top:14px;padding:10px 14px;border-radius:8px;background:#f3f8f0;border:1px solid var(--line);font-size:.8rem;color:var(--muted);display:inline-block}
+
+    @media(max-width:800px){.hero{padding:52px 24px 94px}.checkout{grid-template-columns:1fr}.impact{display:none}.payment-panel{padding:26px 20px}.amounts{grid-template-columns:repeat(2,1fr)}.methods{grid-template-columns:1fr}}
+    @media(max-width:440px){.topbar{padding:0 16px}.brand{font-size:.7rem}.hero{padding-left:20px;padding-right:20px}.checkout{padding:0 12px 36px;gap:16px}.heading{display:block}.secure{display:inline-block;margin-top:12px}.upi-layout{align-items:flex-start;gap:12px}.qr{flex-basis:104px;width:104px;height:104px}.upi-id{font-size:.68rem}.method-content{padding:13px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="index.html"><b>♥</b>ANIMAL ALLIES</a><a class="back" href="index.html">← Back to home</a></header>
   <main>
-    <section class="hero"><div class="hero-inner"><p class="eyebrow">Every contribution matters</p><h1>A little kindness can change a whole life.</h1><p>Your donation helps provide urgent treatment, safe shelter, food, and second chances for animals who need us most.</p></div></section>
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">Every contribution matters</p>
+        <h1>A little kindness can change a whole life.</h1>
+        <p>Your donation helps provide urgent treatment, safe shelter, food, and second chances for animals who need us most.</p>
+      </div>
+    </section>
+
     <section class="checkout" aria-label="Donation checkout">
       <div class="panel payment-panel">
         <div id="checkoutContent">
-          <div class="heading"><div><h2>Choose your impact</h2><p class="sub">100% of your gift supports animal care.</p></div><span class="secure">🔒 Secure payment</span></div>
+          <div class="heading">
+            <div><h2>Choose your impact</h2><p class="sub">100% of your gift supports animal care.</p></div>
+            <span class="secure">🔒 Secure payment</span>
+          </div>
+
           <label class="label">Donation amount</label>
-          <div class="amounts" role="group" aria-label="Suggested donation amounts"><button class="amount-choice" type="button" data-amount="199">₹199</button><button class="amount-choice" type="button" data-amount="499">₹499</button><button class="amount-choice" type="button" data-amount="999" aria-pressed="true">₹999</button><button class="amount-choice" type="button" data-amount="2499">₹2,499</button></div>
+          <div class="amounts" role="group" aria-label="Suggested donation amounts">
+            <button class="amount-choice" type="button" data-amount="199">₹199</button>
+            <button class="amount-choice" type="button" data-amount="499">₹499</button>
+            <button class="amount-choice" type="button" data-amount="999" aria-pressed="true">₹999</button>
+            <button class="amount-choice" type="button" data-amount="2499">₹2,499</button>
+          </div>
           <div class="custom"><span>₹</span><input id="amount" inputmode="decimal" type="number" min="1" max="100000" value="999" aria-label="Custom donation amount in rupees" required></div>
+
           <div class="divider"></div>
           <label class="label">Payment method</label>
           <div class="methods" role="tablist" aria-label="Payment method">
@@ -51,11 +134,8 @@
             </button>
           </div>
 
-          <!-- ── UPI / ZeroPaye panel ─────────────────────────────────── -->
+          <!-- ── UPI Panel ──────────────────────────────────────────────── -->
           <div class="method-content" id="upiContent">
-            <!-- ZeroPaye active badge (shown only when ZeroPaye is enabled) -->
-            <div id="zpBadge" class="zp-badge inactive" style="display:none">⚡ ZeroPaye · Zero-fee UPI</div>
-
             <div class="upi-layout">
               <div class="qr" id="qrcode" aria-label="UPI payment QR code"></div>
               <div class="upi-copy">
@@ -65,20 +145,33 @@
                 <button class="copy" id="copyUpi" type="button">Copy UPI ID</button>
               </div>
             </div>
-
-            <!-- ZeroPaye fee note (shown only when ZeroPaye is enabled) -->
-            <div id="zpFeeNote" class="zp-fee-note" style="display:none">
-              💡 <strong>Zero fees</strong> — this payment goes directly to Animal Allies with no platform cut, powered by <a href="https://github.com/DKUMARGUPTA/ZeroPaye" target="_blank" rel="noopener">ZeroPaye</a>.
-            </div>
-
             <button id="upiPay" class="pay" type="button">Pay ₹999 with a UPI app →</button>
-            <p class="micro">Your UPI app will show the final payment approval screen.</p>
-
-            <!-- ZeroPaye real-time payment status (polls /api/zeropaye/status) -->
-            <div class="zp-status" id="zpStatus" role="status" aria-live="polite"></div>
+            <p class="micro">Your UPI app will show the final approval screen. After paying, confirm below.</p>
           </div>
 
-          <!-- ── Razorpay panel ───────────────────────────────────────── -->
+          <!-- ── Confirm Payment Step (shown after UPI app returns) ─────── -->
+          <div class="confirm-step" id="confirmStep" aria-live="polite">
+            <h3>✅ Confirm your donation</h3>
+            <p>Paid successfully? Enter your UPI Transaction ID so we can send your receipt and verify the donation.</p>
+            <div class="ref-tag" id="refTag"></div>
+            <div class="field">
+              <label for="donorName">Your name <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+              <input id="donorName" type="text" placeholder="e.g. Priya Sharma" autocomplete="name" style="padding-left:14px">
+            </div>
+            <div class="field">
+              <label for="donorEmail">Email for receipt <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+              <input id="donorEmail" type="email" placeholder="e.g. priya@example.com" autocomplete="email" style="padding-left:14px">
+            </div>
+            <div class="field">
+              <label for="utrInput">UPI Transaction ID <span style="color:var(--red)">*</span></label>
+              <input id="utrInput" type="text" placeholder="e.g. 123456789012" autocomplete="off" style="padding-left:14px; font-family:ui-monospace,monospace; letter-spacing:.05em">
+              <p class="utr-hint">📱 Open your UPI app → Transactions → copy the 12-digit reference number</p>
+            </div>
+            <button id="confirmBtn" class="pay" type="button">Confirm donation →</button>
+            <button class="back-link" id="backToUpi" type="button">← Go back / Pay again</button>
+          </div>
+
+          <!-- ── Razorpay Panel ─────────────────────────────────────────── -->
           <div class="method-content" id="gatewayContent" hidden>
             <h3>One secure checkout for every method</h3>
             <p class="sub">Pay by UPI, card, netbanking, or wallet through Razorpay's encrypted checkout.</p>
@@ -88,61 +181,80 @@
 
           <p class="error" id="paymentError" role="alert"></p>
         </div>
-        <div class="receipt" id="receipt" aria-live="polite"><div class="mark">✓</div><h2>Thank you for caring.</h2><p id="receiptText"></p><p>Your kindness is now part of an animal's recovery story.</p><a href="index.html">Return to Animal Allies</a></div>
+
+        <!-- ── Receipt ───────────────────────────────────────────────────── -->
+        <div class="receipt" id="receipt" aria-live="polite">
+          <div class="mark">✓</div>
+          <h2>Thank you for caring.</h2>
+          <p id="receiptText"></p>
+          <p>Your kindness is now part of an animal's recovery story.</p>
+          <div class="receipt-ref" id="receiptRef"></div>
+          <br><br>
+          <a href="index.html">Return to Animal Allies</a>
+        </div>
       </div>
-      <aside class="panel impact"><div class="impact-image"><span>Where your gift goes</span></div><div class="impact-body"><p>We turn compassion into practical care for animals in urgent need.</p><div class="impact-list"><div class="impact-item"><b>01</b><span><strong>₹199</strong> can provide a nutritious meal and supplies.</span></div><div class="impact-item"><b>02</b><span><strong>₹499</strong> helps cover essential first-aid care.</span></div><div class="impact-item"><b>03</b><span><strong>₹999</strong> supports a safe night of shelter and treatment.</span></div></div><div class="trust">🔒 Payments are encrypted. UPI goes directly to Animal Allies. Card & wallet payments are handled by Razorpay, a certified payment provider.</div></div></aside>
+
+      <aside class="panel impact">
+        <div class="impact-image"><span>Where your gift goes</span></div>
+        <div class="impact-body">
+          <p>We turn compassion into practical care for animals in urgent need.</p>
+          <div class="impact-list">
+            <div class="impact-item"><b>01</b><span><strong>₹199</strong> can provide a nutritious meal and supplies.</span></div>
+            <div class="impact-item"><b>02</b><span><strong>₹499</strong> helps cover essential first-aid care.</span></div>
+            <div class="impact-item"><b>03</b><span><strong>₹999</strong> supports a safe night of shelter and treatment.</span></div>
+          </div>
+          <div class="trust">🔒 UPI payments go directly to Animal Allies with zero fees. Card & wallet payments are handled by Razorpay, a certified payment provider.</div>
+        </div>
+      </aside>
     </section>
   </main>
 
   <script>
   (() => {
-    // ── Config ──────────────────────────────────────────────────────────────
-    const FALLBACK_UPI_ID  = '7398259999@ybl';
-    const RECIPIENT        = 'Animal Allies';
-    const POLL_INTERVAL_MS = 3000;   // poll ZeroPaye status every 3 s
-    const POLL_MAX         = 40;     // give up after ~2 minutes
+    const RECIPIENT = 'Animal Allies';
 
-    // ── DOM refs ────────────────────────────────────────────────────────────
-    const input      = document.querySelector('#amount');
-    const qrEl       = document.querySelector('#qrcode');
-    const upiPay     = document.querySelector('#upiPay');
-    const gatewayPay = document.querySelector('#gatewayPay');
-    const errorEl    = document.querySelector('#paymentError');
-    const zpStatus   = document.querySelector('#zpStatus');
-    const zpBadge    = document.querySelector('#zpBadge');
-    const zpFeeNote  = document.querySelector('#zpFeeNote');
+    // ── DOM ──────────────────────────────────────────────────────────────────
+    const amountInput  = document.querySelector('#amount');
+    const qrEl         = document.querySelector('#qrcode');
+    const upiPay       = document.querySelector('#upiPay');
+    const gatewayPay   = document.querySelector('#gatewayPay');
+    const errorEl      = document.querySelector('#paymentError');
+    const upiContent   = document.querySelector('#upiContent');
+    const confirmStep  = document.querySelector('#confirmStep');
+    const refTag       = document.querySelector('#refTag');
+    const utrInput     = document.querySelector('#utrInput');
+    const donorName    = document.querySelector('#donorName');
+    const donorEmail   = document.querySelector('#donorEmail');
+    const confirmBtn   = document.querySelector('#confirmBtn');
+    const backToUpi    = document.querySelector('#backToUpi');
     const displayUpiId = document.querySelector('#displayUpiId');
 
-    // ── State ───────────────────────────────────────────────────────────────
-    let zpEnabled    = false;        // true when server has ZeroPaye configured
-    let activeUpiId  = FALLBACK_UPI_ID;
-    let zpOrderId    = null;         // current ZeroPaye order
-    let pollTimer    = null;         // setInterval handle
-    let pollCount    = 0;
+    // ── State ────────────────────────────────────────────────────────────────
+    let activeUpiId = '7398259999@ybl';
+    let currentRef  = null;   // order ref from /api/upi/initiate
+    let currentAmt  = null;   // amount at time of initiating
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────────────
     const fmt    = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(n);
-    const amount = () => Number.parseFloat(input.value);
+    const amount = () => Number.parseFloat(amountInput.value);
     const valid  = () => Number.isFinite(amount()) && amount() >= 1 && amount() <= 100000;
     const fail   = m => { errorEl.textContent = m; errorEl.classList.add('show'); };
     const clear  = () => errorEl.classList.remove('show');
-    const upiLink = (id, amtVal) =>
-      `upi://pay?pa=${encodeURIComponent(id)}&pn=${encodeURIComponent(RECIPIENT)}&tn=${encodeURIComponent('Animal Allies donation')}&am=${encodeURIComponent(amtVal.toFixed(2))}&cu=INR`;
+    const upiLink = (id, amtVal, ref) =>
+      `upi://pay?pa=${encodeURIComponent(id)}&pn=${encodeURIComponent(RECIPIENT)}&tn=${encodeURIComponent(ref ? `Donation ${ref}` : 'Animal Allies donation')}&am=${encodeURIComponent(amtVal.toFixed(2))}&cu=INR`;
 
-    function showReceipt(text) {
-      stopPolling();
+    function showReceipt(text, ref, utr) {
       document.querySelector('#checkoutContent').hidden = true;
       document.querySelector('#receiptText').textContent = text;
+      document.querySelector('#receiptRef').textContent = `Order: ${ref}  •  UPI Ref: ${utr}`;
       document.querySelector('#receipt').classList.add('show');
     }
 
-    // ── QR render ───────────────────────────────────────────────────────────
     function renderQR(link) {
       qrEl.replaceChildren();
       if (window.QRCode) new QRCode(qrEl, { text: link, width: 128, height: 128, correctLevel: QRCode.CorrectLevel.M });
     }
 
-    // ── Render all UI for current amount ────────────────────────────────────
     function render() {
       if (!valid()) return;
       document.querySelectorAll('.amount-choice').forEach(b =>
@@ -150,119 +262,127 @@
       upiPay.textContent     = `Pay ₹${fmt(amount())} with a UPI app →`;
       gatewayPay.textContent = `Donate ₹${fmt(amount())} securely →`;
       displayUpiId.textContent = activeUpiId;
-
-      // Always generate a fresh QR for the current amount
-      renderQR(upiLink(activeUpiId, amount()));
-
-      // Reset any active ZeroPaye poll when the amount changes
-      stopPolling();
-      hideZpStatus();
+      renderQR(upiLink(activeUpiId, amount(), null));
+      hideConfirm();
+      currentRef = null;
     }
 
-    // ── ZeroPaye status panel helpers ────────────────────────────────────────
-    function showZpStatus(type, html) {
-      zpStatus.className = `zp-status show ${type}`;
-      zpStatus.innerHTML = html;
-    }
-    function hideZpStatus() {
-      zpStatus.className = 'zp-status';
-      zpStatus.textContent = '';
-    }
-
-    // ── ZeroPaye: stop polling ───────────────────────────────────────────────
-    function stopPolling() {
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-      pollCount = 0;
-    }
-
-    // ── ZeroPaye: poll /api/zeropaye/status ──────────────────────────────────
-    async function pollZpStatus(orderId, amtVal) {
-      pollCount++;
-      if (pollCount > POLL_MAX) {
-        stopPolling();
-        showZpStatus('failed', '⏱ Payment window expired. If you completed the payment, please contact us with your UPI reference.');
-        return;
-      }
-      try {
-        const res  = await fetch('/api/zeropaye/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId }) });
-        const data = await res.json();
-        if (data.status === 'paid') {
-          stopPolling();
-          showZpStatus('paid', `<span class="zp-tick">✓</span> Payment received! ₹${fmt(amtVal)} confirmed.`);
-          setTimeout(() => showReceipt(`Your donation of ₹${fmt(amtVal)} reached Animal Allies instantly — no fees deducted. Reference: ${orderId}.`), 1200);
-        } else if (data.status === 'failed') {
-          stopPolling();
-          showZpStatus('failed', '✗ Payment was not completed. Please try again.');
-        }
-        // 'pending' → keep polling
-      } catch (_) { /* network hiccup — keep polling */ }
-    }
-
-    // ── ZeroPaye: initiate a payment session ─────────────────────────────────
-    async function startZpPayment() {
-      if (!valid()) return fail('Please enter a donation between ₹1 and ₹1,00,000.');
-      stopPolling();
-      hideZpStatus();
-      upiPay.disabled = true;
-      upiPay.textContent = 'Preparing ZeroPaye session…';
+    // ── Show / hide confirm step ─────────────────────────────────────────────
+    function showConfirm(ref, amtVal) {
+      currentRef = ref;
+      currentAmt = amtVal;
+      refTag.textContent = `Order: ${ref}  •  Amount: ₹${fmt(amtVal)}`;
+      upiContent.style.display  = 'none';
+      confirmStep.classList.add('show');
+      utrInput.value = '';
+      utrInput.focus();
       clear();
-
-      const idempotencyKey = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      try {
-        const res  = await fetch('/api/zeropaye/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: amount(), idempotencyKey }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Could not create ZeroPaye session.');
-
-        zpOrderId = data.orderId;
-        const link = data.upiLink || upiLink(data.upiId || activeUpiId, amount());
-
-        // Refresh QR with ZeroPaye-issued deep link
-        renderQR(link);
-
-        // Open the UPI deep link on mobile
-        location.href = link;
-
-        // Start polling for confirmation
-        showZpStatus('pending', `<span class="zp-spinner"></span> Waiting for your UPI payment… (₹${fmt(amount())})`);
-        const amtSnapshot = amount();
-        pollTimer = setInterval(() => pollZpStatus(zpOrderId, amtSnapshot), POLL_INTERVAL_MS);
-      } catch (err) {
-        fail(err.message || 'ZeroPaye session failed. Please try UPI QR directly.');
-        // Fallback: open plain UPI deep link
-        if (valid()) location.href = upiLink(activeUpiId, amount());
-      } finally {
-        upiPay.disabled = false;
-        render();
-      }
+    }
+    function hideConfirm() {
+      confirmStep.classList.remove('show');
+      upiContent.style.display = '';
+      currentRef = null;
+      currentAmt = null;
     }
 
-    // ── Probe server capabilities on load ────────────────────────────────────
+    // ── Probe server for UPI ID ───────────────────────────────────────────────
     async function probeCapabilities() {
       try {
         const res  = await fetch('/api/payment-capabilities');
         if (!res.ok) return;
         const caps = await res.json();
-        zpEnabled = !!(caps.zeroPaye);
-        if (zpEnabled) {
-          activeUpiId = caps.zeroPaye_upiId || FALLBACK_UPI_ID;
-          zpBadge.className  = 'zp-badge';
-          zpBadge.style.display = 'inline-flex';
-          zpFeeNote.style.display = 'block';
+        if (caps.upiId) {
+          activeUpiId = caps.upiId;
+          displayUpiId.textContent = activeUpiId;
+          renderQR(upiLink(activeUpiId, amount(), null));
         }
-      } catch (_) { /* server not reachable — degrade gracefully */ }
-      render();
+      } catch (_) { /* server not reachable — use defaults */ }
     }
 
-    // ── Event wiring ─────────────────────────────────────────────────────────
+    // ── UPI Pay button ────────────────────────────────────────────────────────
+    upiPay.addEventListener('click', async () => {
+      if (!valid()) return fail('Please enter a donation between ₹1 and ₹1,00,000.');
+      upiPay.disabled = true;
+      upiPay.innerHTML = '<span class="spinner"></span>Opening UPI app…';
+      clear();
+      try {
+        // Create order on server to get a unique ref
+        const res  = await fetch('/api/upi/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: amount() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not create UPI session.');
+
+        const link = data.upiLink || upiLink(activeUpiId, amount(), data.ref);
+
+        // Refresh QR with the unique ref embedded in the note
+        renderQR(link);
+
+        // Open the UPI deep link (works on mobile, ignored gracefully on desktop)
+        window.location.href = link;
+
+        // After a short delay, show the confirm step (user will return from UPI app)
+        setTimeout(() => {
+          showConfirm(data.ref, data.amount);
+        }, 1500);
+
+      } catch (err) {
+        fail(err.message || 'Could not start UPI payment. Please scan the QR code directly.');
+        // Fallback: open plain UPI link
+        if (valid()) window.location.href = upiLink(activeUpiId, amount(), null);
+      } finally {
+        upiPay.disabled = false;
+        upiPay.textContent = `Pay ₹${fmt(amount())} with a UPI app →`;
+      }
+    });
+
+    // ── Confirm button ────────────────────────────────────────────────────────
+    confirmBtn.addEventListener('click', async () => {
+      const utr   = utrInput.value.trim().toUpperCase();
+      const name  = donorName.value.trim();
+      const email = donorEmail.value.trim();
+
+      if (!utr) return fail('Please enter your UPI Transaction ID.');
+      if (!/^[A-Z0-9]{8,22}$/.test(utr))
+        return fail('That doesn\'t look like a valid UPI Transaction ID. It\'s usually 12 alphanumeric characters found in your UPI app\'s transaction history.');
+
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<span class="spinner"></span>Verifying…';
+      clear();
+
+      try {
+        const res  = await fetch('/api/upi/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: currentRef, utr, name, email }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Confirmation failed. Please try again.');
+
+        const receiptMsg = email
+          ? `Your donation of ₹${fmt(currentAmt)} has been confirmed and a receipt is on its way to ${email}.`
+          : `Your donation of ₹${fmt(currentAmt)} has been confirmed. Thank you for your generosity! 🐾`;
+
+        showReceipt(receiptMsg, currentRef, utr);
+      } catch (err) {
+        fail(err.message || 'Could not confirm your payment. Please try again or contact us.');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm donation →';
+      }
+    });
+
+    // ── Back link ─────────────────────────────────────────────────────────────
+    backToUpi.addEventListener('click', () => { hideConfirm(); clear(); render(); });
+
+    // ── Amount buttons ────────────────────────────────────────────────────────
     document.querySelectorAll('.amount-choice').forEach(b =>
-      b.addEventListener('click', () => { input.value = b.dataset.amount; render(); clear(); }));
+      b.addEventListener('click', () => { amountInput.value = b.dataset.amount; render(); clear(); }));
+    amountInput.addEventListener('input', () => { render(); clear(); });
 
-    input.addEventListener('input', () => { render(); clear(); });
-
+    // ── Method tabs ───────────────────────────────────────────────────────────
     document.querySelectorAll('.method').forEach(b =>
       b.addEventListener('click', () => {
         const isUpi = b.dataset.method === 'upi';
@@ -270,43 +390,34 @@
           x.classList.toggle('active', x === b);
           x.setAttribute('aria-selected', String(x === b));
         });
-        document.querySelector('#upiContent').hidden  = !isUpi;
-        document.querySelector('#gatewayContent').hidden = isUpi;
+        document.querySelector('#upiContent').hidden      = !isUpi;
+        document.querySelector('#gatewayContent').hidden  = isUpi;
+        hideConfirm();
         clear();
-        stopPolling();
-        hideZpStatus();
       }));
 
+    // ── Copy UPI ID ───────────────────────────────────────────────────────────
     document.querySelector('#copyUpi').addEventListener('click', async e => {
       try {
         await navigator.clipboard.writeText(activeUpiId);
-        e.target.textContent = 'UPI ID copied';
+        e.target.textContent = 'UPI ID copied ✓';
         setTimeout(() => e.target.textContent = 'Copy UPI ID', 1800);
       } catch { fail('Please copy the UPI ID: ' + activeUpiId); }
     });
 
-    // UPI Pay button: use ZeroPaye when available, plain deep-link otherwise
-    upiPay.addEventListener('click', () => {
-      if (!valid()) return fail('Please enter a donation between ₹1 and ₹1,00,000.');
-      if (zpEnabled) {
-        startZpPayment();
-      } else {
-        location.href = upiLink(activeUpiId, amount());
-      }
-    });
-
-    // Razorpay gateway
+    // ── Razorpay gateway ──────────────────────────────────────────────────────
     gatewayPay.addEventListener('click', async () => {
       if (!valid()) return fail('Please enter a donation between ₹1 and ₹1,00,000.');
       const c = window.ANIMAL_ALLIES_PAYMENT_CONFIG || {};
       if (!c.razorpayKeyId || c.razorpayKeyId.startsWith('rzp_test_replace'))
         return fail('Secure checkout is being set up. You can still donate instantly using the UPI QR code.');
       gatewayPay.disabled = true;
-      gatewayPay.textContent = 'Preparing secure checkout…';
+      gatewayPay.innerHTML = '<span class="spinner"></span>Preparing secure checkout…';
       clear();
       try {
         const response = await fetch('/api/create-order', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: Math.round(amount() * 100) }),
         });
         const order = await response.json();
@@ -321,7 +432,10 @@
               body: JSON.stringify(result),
             });
             if (!verified.ok) throw Error('Payment verification could not be completed. Please contact us with your payment reference.');
-            showReceipt(`Your donation of ₹${fmt(amount())} has been received safely. Reference: ${result.razorpay_payment_id}.`);
+            document.querySelector('#checkoutContent').hidden = true;
+            document.querySelector('#receiptText').textContent = `Your donation of ₹${fmt(amount())} has been received safely. Reference: ${result.razorpay_payment_id}.`;
+            document.querySelector('#receiptRef').textContent = '';
+            document.querySelector('#receipt').classList.add('show');
           },
         });
         checkout.on('payment.failed', d => fail(d.error.description || 'Payment was not completed. Please try again.'));
@@ -330,14 +444,14 @@
         fail(err.message || 'Unable to open secure checkout. Please try UPI instead.');
       } finally {
         gatewayPay.disabled = false;
-        render();
+        gatewayPay.textContent = `Donate ₹${fmt(amount())} securely →`;
       }
     });
 
-    // ── Init ─────────────────────────────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────────
     window.addEventListener('load', () => {
-      render();              // initial render with fallback UPI ID
-      probeCapabilities();   // async upgrade to ZeroPaye if server supports it
+      render();
+      probeCapabilities();
     });
   })();
   </script>
